@@ -204,3 +204,7 @@ Make sure to set the mnemonic in your `.env` file to that of the instance runnin
 ## License
 
 This project is licensed under MIT.
+
+```bash
+npx hardhat vars set ARBISCAN_API_KEY
+```

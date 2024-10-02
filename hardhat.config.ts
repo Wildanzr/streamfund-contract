@@ -23,6 +23,7 @@ const chainIds = {
   "polygon-mainnet": 137,
   "polygon-mumbai": 80001,
   sepolia: 11155111,
+  "base-sepolia": 84532,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
@@ -49,7 +50,7 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
 }
 
 const config: HardhatUserConfig = {
-  defaultNetwork: "hardhat",
+  defaultNetwork: "base-sepolia",
   namedAccounts: {
     deployer: 0,
   },
@@ -63,8 +64,20 @@ const config: HardhatUserConfig = {
       polygon: vars.get("POLYGONSCAN_API_KEY", ""),
       polygonMumbai: vars.get("POLYGONSCAN_API_KEY", ""),
       sepolia: vars.get("ETHERSCAN_API_KEY", ""),
+      baseSepolia: vars.get("BASESCAN_API_KEY", ""),
     },
+    customChains: [
+      {
+        network: "base-sepolia",
+        chainId: 84532,
+        urls: {
+          apiURL: `https://base-sepolia.infura.io/v3/${infuraApiKey}`,
+          browserURL: "https://sepolia.basescan.org",
+        },
+      },
+    ],
   },
+
   gasReporter: {
     currency: "USD",
     enabled: process.env.REPORT_GAS ? true : false,
@@ -93,6 +106,7 @@ const config: HardhatUserConfig = {
     "polygon-mainnet": getChainConfig("polygon-mainnet"),
     "polygon-mumbai": getChainConfig("polygon-mumbai"),
     sepolia: getChainConfig("sepolia"),
+    "base-sepolia": getChainConfig("base-sepolia"),
   },
   paths: {
     artifacts: "./artifacts",
