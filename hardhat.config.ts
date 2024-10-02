@@ -64,14 +64,22 @@ const config: HardhatUserConfig = {
       polygon: vars.get("POLYGONSCAN_API_KEY", ""),
       polygonMumbai: vars.get("POLYGONSCAN_API_KEY", ""),
       sepolia: vars.get("ETHERSCAN_API_KEY", ""),
-      baseSepolia: vars.get("BASESCAN_API_KEY", ""),
+      "base-sepolia": vars.get("BASESCAN_API_KEY", ""),
     },
     customChains: [
+      {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.basescan.org/api",
+          browserURL: "https://basescan.org",
+        },
+      },
       {
         network: "base-sepolia",
         chainId: 84532,
         urls: {
-          apiURL: `https://base-sepolia.infura.io/v3/${infuraApiKey}`,
+          apiURL: "https://api-sepolia.basescan.org/api",
           browserURL: "https://sepolia.basescan.org",
         },
       },
@@ -115,7 +123,7 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   solidity: {
-    version: "0.8.19",
+    version: "0.8.20",
     settings: {
       metadata: {
         // Not including the metadata hash
