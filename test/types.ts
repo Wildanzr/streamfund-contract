@@ -1,14 +1,21 @@
 import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/dist/src/signer-with-address";
 
-import type { Lock } from "../types/Lock";
+import type { Lock, TokenManagement } from "../types";
 
 type Fixture<T> = () => Promise<T>;
 
 declare module "mocha" {
   export interface Context {
+    // Contracts
     lock: Lock;
+    tokenManagement: TokenManagement;
     loadFixture: <T>(fixture: Fixture<T>) => Promise<T>;
     signers: Signers;
+
+    // Variables
+    owner: SignerWithAddress;
+    editor: SignerWithAddress;
+    accounts: SignerWithAddress[];
   }
 }
 

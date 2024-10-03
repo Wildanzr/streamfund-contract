@@ -20,6 +20,7 @@ contract TokenManagement is AccessControl {
     EnumerableMap.UintToAddressMap private tokens;
 
     constructor() {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(EDITOR_ROLE, msg.sender);
     }
 
@@ -65,7 +66,10 @@ contract TokenManagement is AccessControl {
      * @param _tokenAddress The address of the token contract to remove
      */
     function removeAllowedToken(address _tokenAddress) external onlyRole(EDITOR_ROLE) {
-        if (allowedTokens[_tokenAddress].priceFeed == address(0)) {
+        if (_tokenAddress == address(0)) {
+            revert ValidationError("Token address cannot be zero");
+        }
+        if (!_isTokenAvailable(_tokenAddress)) {
             revert ValidationError("Token does not exist");
         }
         delete allowedTokens[_tokenAddress];
@@ -75,18 +79,21 @@ contract TokenManagement is AccessControl {
 
     /**
      * @notice Retrieves the list of allowed tokens
+     * @return An array of token addresses
      * @return An array of AllowedToken structs
      */
-    function getAllowedTokens() public view returns (AllowedToken[] memory) {
+    function getAllowedTokens() public view returns (address[] memory, AllowedToken[] memory) {
         AllowedToken[] memory _allowedTokens = new AllowedToken[](tokens.length());
+        address[] memory _addresses = new address[](tokens.length());
         for (uint256 i = 0; i < tokens.length(); ) {
             (, address tokenAddress) = tokens.at(i);
             _allowedTokens[i] = allowedTokens[tokenAddress];
+            _addresses[i] = tokenAddress;
             unchecked {
                 i++;
             }
         }
-        return _allowedTokens;
+        return (_addresses, _allowedTokens);
     }
 
     /**
