@@ -73,8 +73,10 @@ contract Tokens is AccessControl {
         if (!_isTokenAvailable(_tokenAddress)) {
             revert TokenValidationError("Token does not exist");
         }
+
+        uint256 index = allowedTokens[_tokenAddress].index;
         delete allowedTokens[_tokenAddress];
-        tokens.remove(allowedTokens[_tokenAddress].index);
+        tokens.remove(index);
         emit TokenRemoved(_tokenAddress);
     }
 

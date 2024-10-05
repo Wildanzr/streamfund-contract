@@ -1,7 +1,7 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
-const deployStreamfund = async (hre: HardhatRuntimeEnvironment) => {
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
@@ -15,11 +15,6 @@ const deployStreamfund = async (hre: HardhatRuntimeEnvironment) => {
   console.log(`Verify now: bunx hardhat verify ${streamfund.address}`);
 };
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  // await deployLock(hre);
-  await deployStreamfund(hre);
-};
-
 export default func;
-func.id = "deploy_streamfund"; // id required to prevent reexecution
+func.id = "streamfund";
 func.tags = ["Streamfund"];
