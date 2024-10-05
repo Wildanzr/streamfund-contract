@@ -37,6 +37,15 @@ contract Streamers {
         emit StreamerRegistered(msg.sender);
     }
 
+    function getStreamerDetails(address _streamer) public view returns (uint256, TokenSupport[] memory) {
+        if (!_isStreamerExist(_streamer)) {
+            revert StreamerValidationError("Streamer not registered");
+        }
+        uint256 index = _getStreamerIndex(_streamer);
+        Streamer memory streamerDetails = registeredStreamer[index];
+        return (index, streamerDetails.cumulative);
+    }
+
     function _isStreamerExist(address _streamer) internal view returns (bool) {
         return streamers.contains(_streamer);
     }

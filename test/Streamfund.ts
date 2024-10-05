@@ -1,5 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
+import { parseEther } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployStreamfundFixture } from "./fixture/Streamfund.fixture";
@@ -32,13 +33,49 @@ describe("Streamfund", function () {
     });
   });
 
-  describe("Register as streamer", function () {
-    beforeEach(async function () {
-      const { streamfund, owner, accounts } = await this.loadFixture(deployStreamfundFixture);
+  describe("Support with ETH", function () {
+    this.beforeEach(async function () {
+      const { streamfund, accounts } = await this.loadFixture(deployStreamfundFixture);
 
       this.streamfund = streamfund;
-      this.owner = owner;
       this.accounts = accounts;
+
+      await this.streamfund.connect(this.accounts[0]).registerAsStreamer();
+      const streamerCount = await this.streamfund.streamerCount();
+      expect(streamerCount).to.be.equal(1);
+    });
+
+    it("Should failed to support because value is zero", async function () {
+      await expect(
+        this.streamfund.connect(this.accounts[1]).supportWithETH(this.accounts[0].address, "Thanks", {
+          value: 0,
+        }),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because streamer is not registered", async function () {
+      await expect(
+        this.streamfund.connect(this.accounts[2]).supportWithETH(this.accounts[1].address, "Thanks", {
+          value: parseEther("1"),
+        }),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should support perfectly ", async function () {
+      const preBalance = await ethers.provider.getBalance(this.accounts[0]);
+
+      await expect(
+        this.streamfund.connect(this.accounts[1]).supportWithETH(this.accounts[0].address, "Thanks", {
+          value: parseEther("1"),
+        }),
+      )
+        .to.be.emit(this.streamfund, "SupportReceived")
+        .withArgs(this.accounts[0], "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", parseEther("1"), "Thanks");
+
+      const postBalance = await ethers.provider.getBalance(this.accounts[0]);
+      const streamerDetails = await this.streamfund.getStreamerDetails(this.accounts[0].address);
+      expect(streamerDetails[1][0][1]).to.be.equal(parseEther("1"));
+      expect(postBalance).to.be.equal(preBalance + parseEther("1"));
     });
   });
 });
