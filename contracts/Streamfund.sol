@@ -3,53 +3,42 @@
 pragma solidity >=0.8.9;
 
 import { TokenManagement } from "./TokenManagement.sol";
-import { PriceConverter } from "./PriceConverter.sol";
+import { Streamers } from "./Streamers.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
-import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
+import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
-contract Streamfund is AccessControl, TokenManagement {
-    using PriceConverter for uint256;
-
+contract Streamfund is AccessControl, TokenManagement, Streamers {
     bytes32 private constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
-    uint256 public totalFunds;
 
-    AggregatorV3Interface private ethPriceFeed;
-    AggregatorV3Interface private btcPriceFeed;
-    AggregatorV3Interface private usdtPriceFeed;
-
-    constructor(address _ethPriceFeed, address _btcPriceFeed, address _usdtPriceFeed) {
+    constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(EDITOR_ROLE, msg.sender);
-        ethPriceFeed = AggregatorV3Interface(_ethPriceFeed);
-        btcPriceFeed = AggregatorV3Interface(_btcPriceFeed);
-        usdtPriceFeed = AggregatorV3Interface(_usdtPriceFeed);
+        registerAsStreamer();
     }
 
-    function getVersion() public view returns (uint256) {
-        return PriceConverter.getVersion(ethPriceFeed);
+    event SupportReceived(address indexed streamer, address token, uint256 amount, string message);
+
+    function supportWithETH(address _streamer, string memory _message) external payable {
+        if (msg.value == 0) {
+            revert ValidationError("Amount cannot be zero");
+        }
+        if (!_isStreamerExist(_streamer)) {
+            revert ValidationError("Streamer not registered");
+        }
+        if (block.chainid != 84532) {
+            revert ValidationError("Only base sepolia chain is supported");
+        }
+
+        payable(_streamer).transfer(msg.value);
+        uint256 index = _getStreamerIndex(_streamer);
+        registeredStreamer[index].cumulative[0].total += msg.value;
+        emit SupportReceived(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value, _message);
     }
 
-    function getEthPrice() public view returns (uint256) {
-        return PriceConverter.getPrice(ethPriceFeed);
-    }
-
-    function getBtcPrice() public view returns (uint256) {
-        return PriceConverter.getPrice(btcPriceFeed);
-    }
-
-    function getUsdtPrice() public view returns (uint256) {
-        return PriceConverter.getPrice(usdtPriceFeed);
-    }
-
-    function getEthConversionRate(uint256 _amount) public view returns (uint256) {
-        return PriceConverter.getConversionRate(_amount, ethPriceFeed);
-    }
-
-    function getBtcConversionRate(uint256 _amount) public view returns (uint256) {
-        return PriceConverter.getConversionRate(_amount, btcPriceFeed);
-    }
-
-    function getUsdtConversionRate(uint256 _amount) public view returns (uint256) {
-        return PriceConverter.getConversionRate(_amount, usdtPriceFeed);
-    }
+    function supportWithToken(
+        address _streamer,
+        address _allowedToken,
+        uint256 amount,
+        string memory _message
+    ) external {}
 }

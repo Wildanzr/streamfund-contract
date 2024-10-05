@@ -25,10 +25,9 @@ describe("TokenManagement", function () {
 
   describe("Deployment", function () {
     beforeEach(async function () {
-      const { tokenManagement, tokenManagement_address, owner } = await this.loadFixture(deployTokenManagementFixture);
+      const { tokenManagement, owner } = await this.loadFixture(deployTokenManagementFixture);
 
       this.tokenManagement = tokenManagement;
-      this.tokenManagement_address = tokenManagement_address;
       this.owner = owner;
     });
 

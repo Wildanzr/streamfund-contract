@@ -24,9 +24,15 @@ const deployStreamfund = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
+  const dummyPriceFeed = [
+    "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+    "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
+  ];
+
   const streamfund = await deploy("Streamfund", {
     from: deployer,
-    args: [],
+    args: [...dummyPriceFeed],
     log: true,
   });
 

@@ -1,6 +1,5 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { parseUnits } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployStreamfundFixture } from "./fixture/Streamfund.fixture";
@@ -33,22 +32,15 @@ describe("Streamfund", function () {
     });
   });
 
-  describe("Get Price", function () {
+  describe("Register as streamer", function () {
     beforeEach(async function () {
-      const { streamfund, owner } = await this.loadFixture(deployStreamfundFixture);
+      const { streamfund, owner, accounts } = await this.loadFixture(deployStreamfundFixture);
 
       this.streamfund = streamfund;
       this.owner = owner;
+      this.accounts = accounts;
     });
 
-    it("Should return version 0", async function () {
-      const version = await this.streamfund.getVersion();
-      expect(version).to.equal(0);
-    });
-
-    it("Should return BTC price with 60000", async function () {
-      const btcPrice = await this.streamfund.getBtcPrice();
-      expect(btcPrice).to.equal(parseUnits("60000", 18));
-    });
+    it("Should ");
   });
 });
