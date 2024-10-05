@@ -27,9 +27,9 @@ contract Streamfund is AccessControl, Tokens, Streamers {
         if (!_isStreamerExist(_streamer)) {
             revert StreamfundValidationError("Streamer not registered");
         }
-        // if (block.chainid != 84532) {
-        //     revert StreamfundValidationError("Only base sepolia chain is supported");
-        // }
+        if (block.chainid != 84532) {
+            revert StreamfundValidationError("Only base sepolia chain is supported");
+        }
 
         payable(_streamer).transfer(msg.value);
         _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value);
