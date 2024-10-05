@@ -3,11 +3,13 @@
 pragma solidity >=0.8.9;
 
 import { Tokens } from "./Tokens.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Streamers } from "./Streamers.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
-import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
 contract Streamfund is AccessControl, Tokens, Streamers {
+    using SafeERC20 for IERC20;
     bytes32 private constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
 
     constructor() {
@@ -30,8 +32,7 @@ contract Streamfund is AccessControl, Tokens, Streamers {
         // }
 
         payable(_streamer).transfer(msg.value);
-        uint256 index = _getStreamerIndex(_streamer);
-        registeredStreamer[index].cumulative[0].total += msg.value;
+        _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value);
         emit SupportReceived(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value, _message);
     }
 
@@ -40,5 +41,26 @@ contract Streamfund is AccessControl, Tokens, Streamers {
         address _allowedToken,
         uint256 amount,
         string memory _message
-    ) external {}
+    ) external {
+        if (amount == 0) {
+            revert StreamfundValidationError("Amount cannot be zero");
+        }
+        if (!_isStreamerExist(_streamer)) {
+            revert StreamfundValidationError("Streamer not registered");
+        }
+        if (!_isTokenAvailable(_allowedToken)) {
+            revert StreamfundValidationError("Token not allowed");
+        }
+        uint256 allowance = IERC20(_allowedToken).allowance(msg.sender, address(this));
+        if (allowance < amount) {
+            revert StreamfundValidationError("Insufficient allowance");
+        }
+        // if (block.chainid != 84532) {
+        //     revert StreamfundValidationError("Only base sepolia chain is supported");
+        // }
+
+        IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, amount);
+        _addTokenSupport(_streamer, _allowedToken, amount);
+        emit SupportReceived(_streamer, _allowedToken, amount, _message);
+    }
 }

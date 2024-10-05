@@ -29,11 +29,11 @@ contract Streamers {
             revert StreamerValidationError("Streamer already registered");
         }
         streamers.set(msg.sender, streamers.length());
-        TokenSupport memory nativeToken = TokenSupport({ token: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, total: 0 });
-        Streamer storage newStreamer = registeredStreamer.push();
-        newStreamer.streamer = msg.sender;
-        newStreamer.cumulative.push(nativeToken);
         streamerCount++;
+        registeredStreamer.push();
+        Streamer storage newStreamer = registeredStreamer[registeredStreamer.length - 1];
+        newStreamer.streamer = msg.sender;
+        _addTokenSupport(msg.sender, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, 0);
         emit StreamerRegistered(msg.sender);
     }
 
@@ -44,6 +44,21 @@ contract Streamers {
         uint256 index = _getStreamerIndex(_streamer);
         Streamer memory streamerDetails = registeredStreamer[index];
         return (index, streamerDetails.cumulative);
+    }
+
+    function _addTokenSupport(address _streamer, address _token, uint256 _amount) internal {
+        uint256 index = _getStreamerIndex(_streamer);
+        for (uint256 i = 0; i < registeredStreamer[index].cumulative.length; ) {
+            if (registeredStreamer[index].cumulative[i].token == _token) {
+                registeredStreamer[index].cumulative[i].total += _amount;
+                return;
+            }
+            unchecked {
+                i++;
+            }
+        }
+        TokenSupport memory newToken = TokenSupport({ token: _token, total: _amount });
+        registeredStreamer[index].cumulative.push(newToken);
     }
 
     function _isStreamerExist(address _streamer) internal view returns (bool) {

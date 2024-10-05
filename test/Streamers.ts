@@ -47,10 +47,31 @@ describe("Streamers", function () {
       );
     });
 
-    it("Shoudl registered perfectly as streamer", async function () {
+    it("Should registered perfectly as streamer", async function () {
       await this.streamers.connect(this.accounts[0]).registerAsStreamer();
       const streamerCount = await this.streamers.streamerCount();
       expect(streamerCount).to.be.equal(1);
+    });
+  });
+
+  describe("Get streamer details", function () {
+    this.beforeEach(async function () {
+      const { streamers, accounts } = await this.loadFixture(deployStreamersFixture);
+
+      this.streamers = streamers;
+      this.accounts = accounts;
+    });
+
+    it("Should failed to get streamer details because streamer is not registered", async function () {
+      await expect(
+        this.streamers.connect(this.accounts[0]).getStreamerDetails(this.accounts[4].address),
+      ).to.be.revertedWithCustomError(this.streamers, "StreamerValidationError");
+    });
+
+    it("Should get streamer details perfectly", async function () {
+      await this.streamers.connect(this.accounts[0]).registerAsStreamer();
+      const streamer = await this.streamers.getStreamerDetails(this.accounts[0].address);
+      expect(streamer[1][0][0]).to.be.equal("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE");
     });
   });
 });
