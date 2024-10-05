@@ -7,7 +7,7 @@ import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/shared/inte
 library PriceConverter {
     function getPrice(AggregatorV3Interface _priceFeed) internal view returns (uint256) {
         (, int256 price, , , ) = _priceFeed.latestRoundData();
-        return uint256(price * 1e10);
+        return uint256(price);
     }
 
     function getConversionRate(uint256 _amount, AggregatorV3Interface _priceFeed) internal view returns (uint256) {
@@ -18,5 +18,9 @@ library PriceConverter {
 
     function getVersion(AggregatorV3Interface _priceFeed) internal view returns (uint256) {
         return _priceFeed.version();
+    }
+
+    function getDecimal(AggregatorV3Interface _priceFeed) internal view returns (uint8) {
+        return _priceFeed.decimals();
     }
 }
