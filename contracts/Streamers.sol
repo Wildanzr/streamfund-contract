@@ -17,16 +17,14 @@ contract Streamers {
         TokenSupport[] cumulative;
     }
 
-    Streamer[] public registeredStreamer;
+    uint256 public streamerCount;
+    Streamer[] internal registeredStreamer;
     EnumerableMap.AddressToUintMap private streamers;
 
     error StreamerValidationError(string message);
     event StreamerRegistered(address streamer);
 
     function registerAsStreamer() public {
-        if (msg.sender == address(0)) {
-            revert StreamerValidationError("Streamer address cannot be zero");
-        }
         if (streamers.contains(msg.sender)) {
             revert StreamerValidationError("Streamer already registered");
         }
@@ -35,6 +33,7 @@ contract Streamers {
         Streamer storage newStreamer = registeredStreamer.push();
         newStreamer.streamer = msg.sender;
         newStreamer.cumulative.push(nativeToken);
+        streamerCount++;
         emit StreamerRegistered(msg.sender);
     }
 

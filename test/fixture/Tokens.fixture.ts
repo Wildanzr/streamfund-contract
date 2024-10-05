@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 
 import type { Tokens, Tokens__factory } from "../../types";
 
-export async function deployTokenManagementFixture() {
+export async function deployTokensFixture() {
   // Get signers
   const signers = await ethers.getSigners();
   const owner = signers[0];

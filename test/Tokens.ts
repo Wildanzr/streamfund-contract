@@ -2,7 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { deployTokenManagementFixture } from "./fixture/TokenManagement.fixture";
+import { deployTokensFixture } from "./fixture/Tokens.fixture";
 import type { Signers } from "./types";
 
 const KECCAK_EDITOR_ROLE = "0x21d1167972f621f75904fb065136bc8b53c7ba1c60ccd3a7758fbee465851e9c";
@@ -13,7 +13,7 @@ const dummyTokenAddress = [
   "0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb",
 ];
 
-describe("TokenManagement", function () {
+describe("Tokens", function () {
   before(async function () {
     this.signers = {} as Signers;
 
@@ -25,7 +25,7 @@ describe("TokenManagement", function () {
 
   describe("Deployment", function () {
     beforeEach(async function () {
-      const { tokens, owner } = await this.loadFixture(deployTokenManagementFixture);
+      const { tokens, owner } = await this.loadFixture(deployTokensFixture);
 
       this.tokens = tokens;
       this.owner = owner;
@@ -39,7 +39,7 @@ describe("TokenManagement", function () {
 
   describe("Add Token", function () {
     beforeEach(async function () {
-      const { tokens, tokenManagement_address, owner, editor } = await this.loadFixture(deployTokenManagementFixture);
+      const { tokens, tokenManagement_address, owner, editor } = await this.loadFixture(deployTokensFixture);
 
       this.tokens = tokens;
       this.tokenManagement_address = tokenManagement_address;
@@ -90,7 +90,7 @@ describe("TokenManagement", function () {
 
   describe("Remove Token", function () {
     beforeEach(async function () {
-      const { tokens, tokenManagement_address, owner, editor } = await this.loadFixture(deployTokenManagementFixture);
+      const { tokens, tokenManagement_address, owner, editor } = await this.loadFixture(deployTokensFixture);
 
       this.tokens = tokens;
       this.tokenManagement_address = tokenManagement_address;

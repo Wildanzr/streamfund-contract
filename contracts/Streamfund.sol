@@ -13,7 +13,6 @@ contract Streamfund is AccessControl, Tokens, Streamers {
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(EDITOR_ROLE, msg.sender);
-        registerAsStreamer();
     }
 
     error StreamfundValidationError(string message);
