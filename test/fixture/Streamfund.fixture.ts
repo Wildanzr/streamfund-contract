@@ -22,11 +22,7 @@ export async function deployStreamfundFixture() {
 
   // Streamfund
   const Streamfund = (await ethers.getContractFactory("Streamfund")) as Streamfund__factory;
-  const streamfund = (await Streamfund.deploy(
-    ethPriceFeed_address,
-    btcPriceFeed_address,
-    usdtPriceFeed_address,
-  )) as Streamfund;
+  const streamfund = (await Streamfund.deploy()) as Streamfund;
   const streamfund_address = await streamfund.getAddress();
 
   return { streamfund, streamfund_address, owner, editor, accounts };

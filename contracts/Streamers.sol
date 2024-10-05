@@ -20,15 +20,15 @@ contract Streamers {
     Streamer[] public registeredStreamer;
     EnumerableMap.AddressToUintMap private streamers;
 
-    error ValidationError(string message);
+    error StreamerValidationError(string message);
     event StreamerRegistered(address streamer);
 
     function registerAsStreamer() public {
         if (msg.sender == address(0)) {
-            revert ValidationError("Streamer address cannot be zero");
+            revert StreamerValidationError("Streamer address cannot be zero");
         }
         if (streamers.contains(msg.sender)) {
-            revert ValidationError("Streamer already registered");
+            revert StreamerValidationError("Streamer already registered");
         }
         streamers.set(msg.sender, streamers.length());
         TokenSupport memory nativeToken = TokenSupport({ token: 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, total: 0 });

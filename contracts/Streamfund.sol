@@ -2,12 +2,12 @@
 
 pragma solidity >=0.8.9;
 
-import { TokenManagement } from "./TokenManagement.sol";
+import { Tokens } from "./Tokens.sol";
 import { Streamers } from "./Streamers.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
-contract Streamfund is AccessControl, TokenManagement, Streamers {
+contract Streamfund is AccessControl, Tokens, Streamers {
     bytes32 private constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
 
     constructor() {
@@ -16,17 +16,18 @@ contract Streamfund is AccessControl, TokenManagement, Streamers {
         registerAsStreamer();
     }
 
+    error StreamfundValidationError(string message);
     event SupportReceived(address indexed streamer, address token, uint256 amount, string message);
 
     function supportWithETH(address _streamer, string memory _message) external payable {
         if (msg.value == 0) {
-            revert ValidationError("Amount cannot be zero");
+            revert StreamfundValidationError("Amount cannot be zero");
         }
         if (!_isStreamerExist(_streamer)) {
-            revert ValidationError("Streamer not registered");
+            revert StreamfundValidationError("Streamer not registered");
         }
         if (block.chainid != 84532) {
-            revert ValidationError("Only base sepolia chain is supported");
+            revert StreamfundValidationError("Only base sepolia chain is supported");
         }
 
         payable(_streamer).transfer(msg.value);

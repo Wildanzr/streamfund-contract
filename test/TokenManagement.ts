@@ -25,24 +25,23 @@ describe("TokenManagement", function () {
 
   describe("Deployment", function () {
     beforeEach(async function () {
-      const { tokenManagement, owner } = await this.loadFixture(deployTokenManagementFixture);
+      const { tokens, owner } = await this.loadFixture(deployTokenManagementFixture);
 
-      this.tokenManagement = tokenManagement;
+      this.tokens = tokens;
       this.owner = owner;
     });
 
     it("Should set the right default admin and editor role", async function () {
-      expect(await this.tokenManagement.hasRole(KECCAK_ADMIN_ROLE, this.owner.address)).to.be.true;
-      expect(await this.tokenManagement.hasRole(KECCAK_EDITOR_ROLE, this.owner.address)).to.be.true;
+      expect(await this.tokens.hasRole(KECCAK_ADMIN_ROLE, this.owner.address)).to.be.true;
+      expect(await this.tokens.hasRole(KECCAK_EDITOR_ROLE, this.owner.address)).to.be.true;
     });
   });
 
   describe("Add Token", function () {
     beforeEach(async function () {
-      const { tokenManagement, tokenManagement_address, owner, editor } =
-        await this.loadFixture(deployTokenManagementFixture);
+      const { tokens, tokenManagement_address, owner, editor } = await this.loadFixture(deployTokenManagementFixture);
 
-      this.tokenManagement = tokenManagement;
+      this.tokens = tokens;
       this.tokenManagement_address = tokenManagement_address;
       this.owner = owner;
       this.editor = editor;
@@ -50,42 +49,40 @@ describe("TokenManagement", function () {
 
     it("Should fail because caller is not an editor", async function () {
       await expect(
-        this.tokenManagement
-          .connect(this.editor)
-          .addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 18, "USDT"),
-      ).to.be.revertedWithCustomError(this.tokenManagement, "AccessControlUnauthorizedAccount");
+        this.tokens.connect(this.editor).addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 18, "USDT"),
+      ).to.be.revertedWithCustomError(this.tokens, "AccessControlUnauthorizedAccount");
     });
 
     it("Should fail because token address is zero address", async function () {
       await expect(
-        this.tokenManagement.addAllowedToken(ethers.ZeroAddress, dummyTokenAddress[0], 18, "USDT"),
-      ).to.be.revertedWithCustomError(this.tokenManagement, "ValidationError");
+        this.tokens.addAllowedToken(ethers.ZeroAddress, dummyTokenAddress[0], 18, "USDT"),
+      ).to.be.revertedWithCustomError(this.tokens, "TokenValidationError");
     });
 
     it("Should fail because pricefeed address is zero address", async function () {
       await expect(
-        this.tokenManagement.addAllowedToken(dummyTokenAddress[0], ethers.ZeroAddress, 18, "USDT"),
-      ).to.be.revertedWithCustomError(this.tokenManagement, "ValidationError");
+        this.tokens.addAllowedToken(dummyTokenAddress[0], ethers.ZeroAddress, 18, "USDT"),
+      ).to.be.revertedWithCustomError(this.tokens, "TokenValidationError");
     });
 
     it("Should fail because symbol is empty", async function () {
       await expect(
-        this.tokenManagement.addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 18, ""),
-      ).to.be.revertedWithCustomError(this.tokenManagement, "ValidationError");
+        this.tokens.addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 18, ""),
+      ).to.be.revertedWithCustomError(this.tokens, "TokenValidationError");
     });
 
     it("Should fail because decimal is zero", async function () {
       await expect(
-        this.tokenManagement.addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 0, "USDT"),
-      ).to.be.revertedWithCustomError(this.tokenManagement, "ValidationError");
+        this.tokens.addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 0, "USDT"),
+      ).to.be.revertedWithCustomError(this.tokens, "TokenValidationError");
     });
 
     it("Should add token successfully", async function () {
-      await expect(await this.tokenManagement.addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 18, "USDT"))
-        .to.be.emit(this.tokenManagement, "TokenAdded")
+      await expect(await this.tokens.addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 18, "USDT"))
+        .to.be.emit(this.tokens, "TokenAdded")
         .withArgs(dummyTokenAddress[0], dummyTokenAddress[1], 18, "USDT");
 
-      const allowedTokens = await this.tokenManagement.getAllowedTokens();
+      const allowedTokens = await this.tokens.getAllowedTokens();
       expect(allowedTokens[0].length).to.be.deep.equal(1);
       expect(allowedTokens[0][0]).to.be.equal(dummyTokenAddress[0]);
     });
@@ -93,10 +90,9 @@ describe("TokenManagement", function () {
 
   describe("Remove Token", function () {
     beforeEach(async function () {
-      const { tokenManagement, tokenManagement_address, owner, editor } =
-        await this.loadFixture(deployTokenManagementFixture);
+      const { tokens, tokenManagement_address, owner, editor } = await this.loadFixture(deployTokenManagementFixture);
 
-      this.tokenManagement = tokenManagement;
+      this.tokens = tokens;
       this.tokenManagement_address = tokenManagement_address;
       this.owner = owner;
       this.editor = editor;
@@ -104,32 +100,32 @@ describe("TokenManagement", function () {
 
     it("Should fail because caller is not an editor", async function () {
       await expect(
-        this.tokenManagement.connect(this.editor).removeAllowedToken(dummyTokenAddress[0]),
-      ).to.be.revertedWithCustomError(this.tokenManagement, "AccessControlUnauthorizedAccount");
+        this.tokens.connect(this.editor).removeAllowedToken(dummyTokenAddress[0]),
+      ).to.be.revertedWithCustomError(this.tokens, "AccessControlUnauthorizedAccount");
     });
 
     it("Should fail because token address is zero address", async function () {
-      await expect(this.tokenManagement.removeAllowedToken(ethers.ZeroAddress)).to.be.revertedWithCustomError(
-        this.tokenManagement,
-        "ValidationError",
+      await expect(this.tokens.removeAllowedToken(ethers.ZeroAddress)).to.be.revertedWithCustomError(
+        this.tokens,
+        "TokenValidationError",
       );
     });
 
     it("Should fail because token is not found", async function () {
-      await expect(this.tokenManagement.removeAllowedToken(dummyTokenAddress[0])).to.be.revertedWithCustomError(
-        this.tokenManagement,
-        "ValidationError",
+      await expect(this.tokens.removeAllowedToken(dummyTokenAddress[0])).to.be.revertedWithCustomError(
+        this.tokens,
+        "TokenValidationError",
       );
     });
 
     it("Should remove token successfully", async function () {
-      await this.tokenManagement.addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 18, "USDT");
+      await this.tokens.addAllowedToken(dummyTokenAddress[0], dummyTokenAddress[1], 18, "USDT");
 
-      await expect(await this.tokenManagement.removeAllowedToken(dummyTokenAddress[0]))
-        .to.be.emit(this.tokenManagement, "TokenRemoved")
+      await expect(await this.tokens.removeAllowedToken(dummyTokenAddress[0]))
+        .to.be.emit(this.tokens, "TokenRemoved")
         .withArgs(dummyTokenAddress[0]);
 
-      const allowedTokens = await this.tokenManagement.getAllowedTokens();
+      const allowedTokens = await this.tokens.getAllowedTokens();
       expect(allowedTokens[0].length).to.be.deep.equal(0);
     });
   });

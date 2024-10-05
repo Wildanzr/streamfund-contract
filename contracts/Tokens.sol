@@ -6,7 +6,7 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
-contract TokenManagement is AccessControl {
+contract Tokens is AccessControl {
     using EnumerableMap for EnumerableMap.UintToAddressMap;
 
     struct AllowedToken {
@@ -25,7 +25,7 @@ contract TokenManagement is AccessControl {
         _grantRole(EDITOR_ROLE, msg.sender);
     }
 
-    error ValidationError(string message);
+    error TokenValidationError(string message);
 
     event TokenAdded(address tokenAddress, address priceFeed, uint8 decimal, string symbol);
     event TokenRemoved(address tokenAddress);
@@ -44,13 +44,13 @@ contract TokenManagement is AccessControl {
         string memory _symbol
     ) external onlyRole(EDITOR_ROLE) {
         if (_tokenAddress == address(0) || _priceFeed == address(0)) {
-            revert ValidationError("Token address cannot be zero");
+            revert TokenValidationError("Token address cannot be zero");
         }
         if (bytes(_symbol).length == 0) {
-            revert ValidationError("Name cannot be empty");
+            revert TokenValidationError("Name cannot be empty");
         }
         if (_decimal == 0) {
-            revert ValidationError("decimal cannot be zero");
+            revert TokenValidationError("decimal cannot be zero");
         }
         allowedTokens[_tokenAddress] = AllowedToken({
             priceFeed: AggregatorV3Interface(_priceFeed),
@@ -68,10 +68,10 @@ contract TokenManagement is AccessControl {
      */
     function removeAllowedToken(address _tokenAddress) external onlyRole(EDITOR_ROLE) {
         if (_tokenAddress == address(0)) {
-            revert ValidationError("Token address cannot be zero");
+            revert TokenValidationError("Token address cannot be zero");
         }
         if (!_isTokenAvailable(_tokenAddress)) {
-            revert ValidationError("Token does not exist");
+            revert TokenValidationError("Token does not exist");
         }
         delete allowedTokens[_tokenAddress];
         tokens.remove(allowedTokens[_tokenAddress].index);

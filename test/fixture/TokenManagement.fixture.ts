@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-import type { TokenManagement, TokenManagement__factory } from "../../types";
+import type { Tokens, Tokens__factory } from "../../types";
 
 export async function deployTokenManagementFixture() {
   // Get signers
@@ -9,9 +9,9 @@ export async function deployTokenManagementFixture() {
   const editor = signers[1];
   const accounts = signers.slice(2);
 
-  const TokenManagement = (await ethers.getContractFactory("TokenManagement")) as TokenManagement__factory;
-  const tokenManagement = (await TokenManagement.deploy()) as TokenManagement;
-  const tokenManagement_address = await tokenManagement.getAddress();
+  const Tokens = (await ethers.getContractFactory("Tokens")) as Tokens__factory;
+  const tokens = (await Tokens.deploy()) as Tokens;
+  const tokenManagement_address = await tokens.getAddress();
 
-  return { tokenManagement, tokenManagement_address, owner, editor, accounts };
+  return { tokens, tokenManagement_address, owner, editor, accounts };
 }

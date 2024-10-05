@@ -40,7 +40,5 @@ describe("Streamfund", function () {
       this.owner = owner;
       this.accounts = accounts;
     });
-
-    it("Should ");
   });
 });
