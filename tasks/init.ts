@@ -15,7 +15,7 @@ task("task:allowedtoken", "Add initial allowed token to Streamfund").setAction(a
   { ethers },
 ) {
   const signers = await ethers.getSigners();
-  const streamfundAddress = "0x2530068079c3DE7833410675DaA301b110eBFDF4";
+  const streamfundAddress = "0x538E2488c3189A9dd068523cbB94d1d4d0805456";
 
   const candidate: AllowedToken[] = [
     {

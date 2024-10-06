@@ -19,7 +19,7 @@ contract Streamfund is AccessControl, Tokens, Streamers {
     }
 
     error StreamfundValidationError(string message);
-    event SupportReceived(address indexed streamer, address token, uint256 amount, string message);
+    event SupportReceived(address indexed streamer, address from, address token, uint256 amount, string message);
 
     function supportWithETH(address _streamer, string memory _message) external payable {
         if (msg.value == 0) {
@@ -37,7 +37,7 @@ contract Streamfund is AccessControl, Tokens, Streamers {
 
         payable(_streamer).transfer(msg.value);
         _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value);
-        emit SupportReceived(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value, _message);
+        emit SupportReceived(_streamer, msg.sender, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value, _message);
     }
 
     function supportWithToken(
@@ -68,7 +68,7 @@ contract Streamfund is AccessControl, Tokens, Streamers {
 
         IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, amount);
         _addTokenSupport(_streamer, _allowedToken, amount);
-        emit SupportReceived(_streamer, _allowedToken, amount, _message);
+        emit SupportReceived(_streamer, msg.sender, _allowedToken, amount, _message);
     }
 
     function getAllowedTokenPrice(address _token) external view returns (uint256, uint8) {
