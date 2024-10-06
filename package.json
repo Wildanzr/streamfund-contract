@@ -61,7 +61,7 @@
     "access": "public"
   },
   "scripts": {
-    "clean": "rimraf ./artifacts ./cache ./coverage ./types ./coverage.json && bun run typechain",
+    "clean": "rimraf ./artifacts ./cache ./coverage ./types ./deployments ./coverage.json && bun run typechain",
     "compile": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat compile",
     "coverage": "hardhat coverage --solcoverjs ./.solcover.js --temp artifacts --testfiles \"test/**/*.ts\" && bun run typechain",
     "deploy:contracts": "hardhat deploy",
@@ -73,7 +73,9 @@
     "prettier:write": "prettier --write \"**/*.{js,json,md,sol,ts,yml}\"",
     "task:deployLock": "hardhat task:deployLock",
     "task:withdraw": "hardhat task:withdraw",
-    "task:allowedtoken": "hardhat task:allowedtoken",
+    "task:add": "hardhat task:add",
+    "task:remove": "hardhat task:remove",
+    "task:support": "hardhat task:support",
     "test": "hardhat test",
     "typechain": "cross-env TS_NODE_TRANSPILE_ONLY=true hardhat typechain"
   },

@@ -71,7 +71,13 @@ describe("Streamfund", function () {
         }),
       )
         .to.be.emit(this.streamfund, "SupportReceived")
-        .withArgs(this.accounts[0], "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", parseEther("1"), "Thanks");
+        .withArgs(
+          this.accounts[0],
+          this.accounts[1].address,
+          "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+          parseEther("1"),
+          "Thanks",
+        );
 
       const postBalance = await ethers.provider.getBalance(this.accounts[0]);
       const streamerDetails = await this.streamfund.getStreamerDetails(this.accounts[0].address);
@@ -183,7 +189,13 @@ describe("Streamfund", function () {
           ),
       )
         .to.be.emit(this.streamfund, "SupportReceived")
-        .withArgs(this.accounts[0], await this.deployedERC20[0].getAddress(), BigInt(0.01 * 10 ** 18), "Thanks");
+        .withArgs(
+          this.accounts[0],
+          this.accounts[1].address,
+          await this.deployedERC20[0].getAddress(),
+          BigInt(0.01 * 10 ** 18),
+          "Thanks",
+        );
 
       const postBalance = await this.deployedERC20[0].balanceOf(this.accounts[0]);
       expect(postBalance).to.be.equal(preBalance + BigInt(0.01 * 10 ** 18));

@@ -98,6 +98,7 @@ const config: HardhatUserConfig = {
         mnemonic,
       },
       chainId: chainIds["base-sepolia"],
+      // chainId: chainIds
     },
     ganache: {
       accounts: {
