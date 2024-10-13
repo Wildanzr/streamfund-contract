@@ -16,7 +16,7 @@ task("task:add", "Add initial allowed token to Streamfund").setAction(async func
   { ethers },
 ) {
   const signers = await ethers.getSigners();
-  const streamfundAddress = "0xe64557155c5c396648128b9BbF7D01883E14F428";
+  const streamfundAddress = "0x93d6e32824e24C195b0497381b016927bA042985";
 
   const candidate: AllowedToken[] = [
     {
@@ -26,30 +26,23 @@ task("task:add", "Add initial allowed token to Streamfund").setAction(async func
       symbol: "ETH",
     },
     {
-      address: "0xc8ee6dA245b1F9f15941e770224ADfF2C960620f",
+      address: "0x4D658F958EB5572a9598B538f36D74B32982b10c",
+      priceFeed: "0x3ec8593F930EA45ea58c968260e6e9FF53FC934f",
+      decimal: 6,
+      symbol: "USDT",
+    },
+    {
+      address: "0x6EC8457cf49A5791Cb6dE61bfF214CEfFae0a0fD",
+      priceFeed: "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165",
+      decimal: 6,
+      symbol: "USDC",
+    },
+    {
+      address: "0xD13eb86Da7bbf8E96656f319d5b856B382ab5098",
       priceFeed: "0xD1092a65338d049DB68D7Be6bD89d17a0929945e",
       decimal: 18,
       symbol: "DAI",
     },
-    {
-      address: "0x9d3E7f41aCA3E35AF1d6050c807b45910D1c503F",
-      priceFeed: "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1",
-      decimal: 18,
-      symbol: "WETH",
-    },
-
-    // {
-    //   address: "0xaBE8Be8F97DeC3475eb761e8B120d0F6dCeFdf89",
-    //   priceFeed: "0xD1092a65338d049DB68D7Be6bD89d17a0929945e",
-    //   decimal: 18,
-    //   symbol: "DAI",
-    // },
-    // {
-    //   address: "0x5E82602432D793FFD2a78a76ebdEf333645A9b79",
-    //   priceFeed: "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1",
-    //   decimal: 18,
-    //   symbol: "WETH",
-    // },
   ];
 
   for (let i = 0; i < candidate.length; i++) {
@@ -70,7 +63,7 @@ task("task:remove", "Remove initial allowed token to Streamfund").setAction(asyn
   { ethers },
 ) {
   const signers = await ethers.getSigners();
-  const streamfundAddress = "0xe64557155c5c396648128b9BbF7D01883E14F428";
+  const streamfundAddress = "0x93d6e32824e24C195b0497381b016927bA042985";
 
   const candidate: AllowedToken[] = [
     {
@@ -80,30 +73,23 @@ task("task:remove", "Remove initial allowed token to Streamfund").setAction(asyn
       symbol: "ETH",
     },
     {
-      address: "0xc8ee6dA245b1F9f15941e770224ADfF2C960620f",
+      address: "0xD48D9f155bEfca237B13e7EAB15425aa92AB2EcE",
+      priceFeed: "0x3ec8593F930EA45ea58c968260e6e9FF53FC934f",
+      decimal: 6,
+      symbol: "USDT",
+    },
+    {
+      address: "0xF1e1339E419363d6e9cEf918E040D1c077D396E8",
+      priceFeed: "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165",
+      decimal: 6,
+      symbol: "USDC",
+    },
+    {
+      address: "0x2a0855d7D014c039cD67A6246F742b92bb761E0E",
       priceFeed: "0xD1092a65338d049DB68D7Be6bD89d17a0929945e",
       decimal: 18,
       symbol: "DAI",
     },
-    {
-      address: "0x9d3E7f41aCA3E35AF1d6050c807b45910D1c503F",
-      priceFeed: "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1",
-      decimal: 18,
-      symbol: "WETH",
-    },
-
-    // {
-    //   address: "0xaBE8Be8F97DeC3475eb761e8B120d0F6dCeFdf89",
-    //   priceFeed: "0xD1092a65338d049DB68D7Be6bD89d17a0929945e",
-    //   decimal: 18,
-    //   symbol: "DAI",
-    // },
-    // {
-    //   address: "0x5E82602432D793FFD2a78a76ebdEf333645A9b79",
-    //   priceFeed: "0x4aDC67696bA383F43DD60A9e78F2C97Fbbfc7cb1",
-    //   decimal: 18,
-    //   symbol: "WETH",
-    // },
   ];
 
   for (let i = 0; i < candidate.length; i++) {
@@ -117,7 +103,7 @@ task("task:remove", "Remove initial allowed token to Streamfund").setAction(asyn
 
 task("task:support", "Give support to streamer").setAction(async function (taskArguments: TaskArguments, { ethers }) {
   const signers = await ethers.getSigners();
-  const streamfundAddress = "0xe64557155c5c396648128b9BbF7D01883E14F428";
+  const streamfundAddress = "0x93d6e32824e24C195b0497381b016927bA042985";
 
   const streamer = "0x53462C7a8b5ad31F0eac94C79E0c341081E4Bfb7";
   const amount1 = parseEther("0.0000011");
@@ -143,7 +129,7 @@ task("task:support", "Give support to streamer").setAction(async function (taskA
 });
 
 task("task:register", "Get streamer details").setAction(async function (taskArguments: TaskArguments, { ethers }) {
-  const streamfundAddress = "0xe64557155c5c396648128b9BbF7D01883E14F428";
+  const streamfundAddress = "0x93d6e32824e24C195b0497381b016927bA042985";
   const streamer = "0x53462C7a8b5ad31F0eac94C79E0c341081E4Bfb7";
 
   console.log("Looking for streamer ", streamer);

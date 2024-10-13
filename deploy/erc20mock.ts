@@ -15,18 +15,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = hre.deployments;
   const path = "args/";
   const tokens: TokenMock[] = [
-    {
-      name: "Dai Stablecoin",
-      ticker: "DAI",
-      mintAmount: BigInt(0.04 * 10 ** 18),
-      decimals: 18,
-    },
     // {
-    //   name: "Tether USD",
-    //   ticker: "USDT",
+    //   name: "Dai Stablecoin",
+    //   ticker: "DAI",
     //   mintAmount: BigInt(100 * 10 ** 18),
-    //   decimals: 6,
+    //   decimals: 18,
     // },
+    {
+      name: "Tether USD",
+      ticker: "USDT",
+      mintAmount: BigInt(100 * 10 ** 6),
+      decimals: 6,
+    },
+    {
+      name: "USDC",
+      ticker: "USDC",
+      mintAmount: BigInt(100 * 10 ** 6),
+      decimals: 6,
+    },
   ];
 
   const deployedTokens: string[] = [];
