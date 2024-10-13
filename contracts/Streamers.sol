@@ -26,7 +26,7 @@ contract Streamers {
 
     function registerAsStreamer() public {
         if (streamers.contains(msg.sender)) {
-            revert StreamerValidationError("Streamer already registered");
+            revert StreamerValidationError("Streamer already registered.");
         }
         streamers.set(msg.sender, streamers.length());
         streamerCount++;
@@ -39,7 +39,7 @@ contract Streamers {
 
     function getStreamerDetails(address _streamer) public view returns (uint256, TokenSupport[] memory) {
         if (!_isStreamerExist(_streamer)) {
-            revert StreamerValidationError("Streamer not registered");
+            return (0, new TokenSupport[](0));
         }
         uint256 index = _getStreamerIndex(_streamer);
         Streamer memory streamerDetails = registeredStreamer[index];

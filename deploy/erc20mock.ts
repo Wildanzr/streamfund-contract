@@ -16,16 +16,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const path = "args/";
   const tokens: TokenMock[] = [
     {
-      name: "Wrapped Ether",
-      ticker: "WETH",
+      name: "USDC",
+      ticker: "USDC",
       mintAmount: BigInt(0.04 * 10 ** 18),
-      decimals: 18,
+      decimals: 6,
     },
     {
-      name: "Dai Stablecoin",
-      ticker: "DAI",
+      name: "Tether USD",
+      ticker: "USDT",
       mintAmount: BigInt(100 * 10 ** 18),
-      decimals: 18,
+      decimals: 6,
     },
   ];
 

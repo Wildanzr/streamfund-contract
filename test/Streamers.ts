@@ -63,9 +63,8 @@ describe("Streamers", function () {
     });
 
     it("Should failed to get streamer details because streamer is not registered", async function () {
-      await expect(
-        this.streamers.connect(this.accounts[0]).getStreamerDetails(this.accounts[4].address),
-      ).to.be.revertedWithCustomError(this.streamers, "StreamerValidationError");
+      const streamer = await this.streamers.getStreamerDetails(this.accounts[0].address);
+      expect(streamer[0]).to.be.equal(0);
     });
 
     it("Should get streamer details perfectly", async function () {
