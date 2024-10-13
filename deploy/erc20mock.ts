@@ -16,17 +16,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const path = "args/";
   const tokens: TokenMock[] = [
     {
-      name: "USDC",
-      ticker: "USDC",
+      name: "Dai Stablecoin",
+      ticker: "DAI",
       mintAmount: BigInt(0.04 * 10 ** 18),
-      decimals: 6,
+      decimals: 18,
     },
-    {
-      name: "Tether USD",
-      ticker: "USDT",
-      mintAmount: BigInt(100 * 10 ** 18),
-      decimals: 6,
-    },
+    // {
+    //   name: "Tether USD",
+    //   ticker: "USDT",
+    //   mintAmount: BigInt(100 * 10 ** 18),
+    //   decimals: 6,
+    // },
   ];
 
   const deployedTokens: string[] = [];
@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       args: [deployer, tokens[i].name, tokens[i].ticker, tokens[i].mintAmount],
       log: true,
     });
-    const tokenParams = `module.exports = ["${deployer}", "${tokens[i].name}", "${tokens[i].ticker}", "${tokens[i].decimals}"];`;
+    const tokenParams = `module.exports = ["${deployer}", "${tokens[i].name}", "${tokens[i].ticker}", "${tokens[i].mintAmount}"];`;
     await writeToFile(`${path}token${i}.ts`, tokenParams);
     console.log(`ERC20Mock contract ${tokens[i].ticker}: `, token.address);
     deployedTokens.push(token.address);
