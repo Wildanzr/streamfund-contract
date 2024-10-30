@@ -20,6 +20,8 @@ contract Streamfund is AccessControl, Tokens, Streamers {
 
     error StreamfundValidationError(string message);
     event SupportReceived(address indexed streamer, address from, address token, uint256 amount, string message);
+    event LiveAdsReceived(address indexed streamer, address from, address token, uint256 amount, string message);
+    event VideoSupportReceived(address indexed streamer, address from, string videoId, uint256 amount, string message);
 
     function supportWithETH(address _streamer, string memory _message) external payable {
         if (msg.value == 0) {

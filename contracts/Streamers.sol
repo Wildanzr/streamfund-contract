@@ -14,6 +14,7 @@ contract Streamers {
 
     struct Streamer {
         address streamer;
+        // uint8 liveAdsPrice;
         TokenSupport[] cumulative;
     }
 
