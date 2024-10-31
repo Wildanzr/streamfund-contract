@@ -111,6 +111,34 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         emit VideoSupportReceived(_streamer, msg.sender, _videoId, finalAmount, _message);
     }
 
+    function supportWithVideoETH(address _streamer, bytes32 _videoId, string memory _message) external payable {
+        if (msg.value == 0) {
+            revert StreamfundValidationError("Amount cannot be zero");
+        }
+        if (!_isStreamerExist(_streamer)) {
+            revert StreamfundValidationError("Streamer not registered");
+        }
+        if (!_isVideoAvailable(_videoId)) {
+            revert StreamfundValidationError("Video not allowed");
+        }
+        if (bytes(_message).length > 150) {
+            revert StreamfundValidationError("Message too long");
+        }
+        if (block.chainid != 84532) {
+            revert StreamfundValidationError("Only base sepolia chain is supported");
+        }
+
+        uint256 usdPrice = getVideo(_videoId);
+        uint256 tokenPrice = PriceConverter.getPrice(
+            allowedTokens[0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE].priceFeed
+        );
+        uint256 amount = (usdPrice * 1e18) / (tokenPrice * 1e18);
+
+        payable(_streamer).transfer(msg.value);
+        _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, amount);
+        emit VideoSupportReceived(_streamer, msg.sender, _videoId, amount, _message);
+    }
+
     function getAllowedTokenPrice(address _token) external view returns (uint256, uint8) {
         if (!_isTokenAvailable(_token)) {
             return (0, 0);

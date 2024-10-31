@@ -12,7 +12,7 @@ library PriceConverter {
 
     function getConversionRate(uint256 _amount, AggregatorV3Interface _priceFeed) internal view returns (uint256) {
         uint256 tokenPrice = getPrice(_priceFeed);
-        uint256 priceInUSD = (tokenPrice * _amount) / 1e18;
+        uint256 priceInUSD = (tokenPrice * _amount);
         return priceInUSD;
     }
 

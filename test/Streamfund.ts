@@ -241,4 +241,32 @@ describe("Streamfund", function () {
       expect(decimal).to.be.equal(8);
     });
   });
+
+  describe("Pricefeed", function () {
+    this.beforeEach(async function () {
+      const { accounts, deployedERC20, deployedPriceFeed, streamfund, owner } =
+        await this.loadFixture(deployStreamfundFixture);
+
+      this.accounts = accounts;
+      this.streamfund = streamfund;
+      this.deployedERC20 = deployedERC20;
+      this.deployedPriceFeed = deployedPriceFeed;
+      this.owner = owner;
+
+      // Add some token and 1 for error testing
+      for (let i = 0; i < this.deployedERC20.length; i++) {
+        const [tokenAddr, pfAddr, decimal, symbol] = await Promise.all([
+          this.deployedERC20[i].getAddress(),
+          this.deployedPriceFeed[i].getAddress(),
+          this.deployedERC20[i].decimals(),
+          this.deployedERC20[i].symbol(),
+        ]);
+        await this.deployedERC20[i].connect(this.owner).mintTo(this.accounts[1].address, BigInt(0.1 * 10 ** 18));
+        await this.deployedERC20[i].connect(this.accounts[1]).mint();
+        if (i !== this.deployedERC20.length - 1) {
+          await this.streamfund.addAllowedToken(tokenAddr, pfAddr, decimal, symbol);
+        }
+      }
+    });
+  });
 });
