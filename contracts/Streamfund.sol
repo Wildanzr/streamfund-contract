@@ -3,13 +3,14 @@
 pragma solidity >=0.8.9;
 
 import { Tokens } from "./Tokens.sol";
+import { Videos } from "./Videos.sol";
+import { Streamers } from "./Streamers.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { Streamers } from "./Streamers.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { PriceConverter } from "./PriceConverter.sol";
 
-contract Streamfund is AccessControl, Tokens, Streamers {
+contract Streamfund is AccessControl, Tokens, Videos, Streamers {
     using SafeERC20 for IERC20;
     bytes32 private constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
 
@@ -21,7 +22,7 @@ contract Streamfund is AccessControl, Tokens, Streamers {
     error StreamfundValidationError(string message);
     event SupportReceived(address indexed streamer, address from, address token, uint256 amount, string message);
     event LiveAdsReceived(address indexed streamer, address from, address token, uint256 amount, string message);
-    event VideoSupportReceived(address indexed streamer, address from, string videoId, uint256 amount, string message);
+    event VideoSupportReceived(address indexed streamer, address from, bytes32 videoId, uint256 amount, string message);
 
     function supportWithETH(address _streamer, string memory _message) external payable {
         if (msg.value == 0) {
@@ -73,9 +74,46 @@ contract Streamfund is AccessControl, Tokens, Streamers {
         emit SupportReceived(_streamer, msg.sender, _allowedToken, amount, _message);
     }
 
+    function supportWithVideo(
+        address _streamer,
+        bytes32 _videoId,
+        address _allowedToken,
+        string memory _message
+    ) external {
+        if (!_isStreamerExist(_streamer)) {
+            revert StreamfundValidationError("Streamer not registered");
+        }
+        if (!_isTokenAvailable(_allowedToken)) {
+            revert StreamfundValidationError("Token not allowed");
+        }
+        if (!_isVideoAvailable(_videoId)) {
+            revert StreamfundValidationError("Video not allowed");
+        }
+        if (bytes(_message).length > 150) {
+            revert StreamfundValidationError("Message too long");
+        }
+        if (block.chainid != 84532) {
+            revert StreamfundValidationError("Only base sepolia chain is supported");
+        }
+        uint8 tokenDecimal = PriceConverter.getDecimal(allowedTokens[_allowedToken].priceFeed);
+        uint256 usdPrice = getVideo(_videoId);
+        uint256 tokenPrice = PriceConverter.getPrice(allowedTokens[_allowedToken].priceFeed);
+        uint256 amount = (usdPrice * 1e18) / (tokenPrice * 1e18);
+        uint256 finalAmount = amount / (10 ** tokenDecimal);
+
+        uint256 allowance = IERC20(_allowedToken).allowance(msg.sender, address(this));
+        if (allowance < finalAmount) {
+            revert StreamfundValidationError("Insufficient allowance");
+        }
+
+        IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, finalAmount);
+        _addTokenSupport(_streamer, _allowedToken, finalAmount);
+        emit VideoSupportReceived(_streamer, msg.sender, _videoId, finalAmount, _message);
+    }
+
     function getAllowedTokenPrice(address _token) external view returns (uint256, uint8) {
         if (!_isTokenAvailable(_token)) {
-            revert StreamfundValidationError("Token not allowed");
+            return (0, 0);
         }
         uint256 price = PriceConverter.getPrice(allowedTokens[_token].priceFeed);
         uint8 decimal = PriceConverter.getDecimal(allowedTokens[_token].priceFeed);

@@ -230,9 +230,9 @@ describe("Streamfund", function () {
     });
 
     it("Should failed to get price because token is not allowed", async function () {
-      await expect(
-        this.streamfund.getAllowedTokenPrice(await this.deployedERC20[1].getAddress()),
-      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+      const [price, decimal] = await this.streamfund.getAllowedTokenPrice(await this.deployedERC20[1].getAddress());
+      expect(price).to.be.equal(0);
+      expect(decimal).to.be.equal(0);
     });
 
     it("Should get price and decimal perfectly", async function () {

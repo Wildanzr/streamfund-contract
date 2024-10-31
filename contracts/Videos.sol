@@ -59,7 +59,7 @@ contract Videos is AccessControl {
      * @param id The ID of the video.
      * @return price The price of the video.
      */
-    function getVideo(bytes32 id) external view returns (uint256 price) {
+    function getVideo(bytes32 id) public view returns (uint256 price) {
         return allowedVideos[id];
     }
 
@@ -70,5 +70,9 @@ contract Videos is AccessControl {
      */
     function _generateRandomBytes32() private view returns (bytes32) {
         return keccak256(abi.encodePacked(block.timestamp, block.prevrandao, msg.sender));
+    }
+
+    function _isVideoAvailable(bytes32 id) internal view returns (bool) {
+        return allowedVideos[id] != 0;
     }
 }
