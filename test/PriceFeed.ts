@@ -99,7 +99,7 @@ describe("PriceFeed", function () {
   describe("Get Conversion Rate", function () {
     it("Should get conversion rate", async function () {
       for (let i = 0; i < this.deployedERC20.length; i++) {
-        const [, pfAddr, , symbol] = await Promise.all([
+        const [, pfAddr, ,] = await Promise.all([
           this.deployedERC20[i].getAddress(),
           this.deployedPriceFeed[i].getAddress(),
           this.deployedERC20[i].decimals(),
@@ -107,14 +107,9 @@ describe("PriceFeed", function () {
         ]);
 
         const tokenAmount = 15;
-        console.log("SYMBOL", symbol);
         const rate = await this.pfTest.gConversionRate(BigInt(tokenAmount), pfAddr);
         const realPrice = tokenAmount * Number(this.priceFeeds[i].price);
-        console.log("RATE", rate.toString());
         expect(parseUnits(realPrice.toString(), 8)).to.be.equal(rate);
-
-        // 30000  00000000
-        // 15     00000000
       }
     });
   });
