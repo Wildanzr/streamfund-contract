@@ -17,7 +17,7 @@ contract Videos is AccessControl {
         _grantRole(EDITOR_ROLE, msg.sender);
     }
 
-    event VideoAdded(bytes32 id, string link, string thumbnail);
+    event VideoAdded(bytes32 id, string link, string thumbnail, uint256 price);
     event VideoRemoved(bytes32 id);
     error VideoValidationError(string message);
 
@@ -39,12 +39,9 @@ contract Videos is AccessControl {
         if (_price == 0) {
             revert VideoValidationError("Price cannot be zero");
         }
-        if (allowedVideos[id] != 0) {
-            revert VideoValidationError("Video already exists");
-        }
         allowedVideos[id] = _price;
         videos.set(id, _price);
-        emit VideoAdded(id, _link, _thumbnail);
+        emit VideoAdded(id, _link, _thumbnail, _price);
     }
 
     function removeVideo(bytes32 id) external onlyRole(EDITOR_ROLE) {

@@ -1,6 +1,6 @@
 import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/dist/src/signer-with-address";
 
-import type { ERC20Mock, PFMock, Streamers, Streamfund, Tokens } from "../types";
+import type { ERC20Mock, PFMock, Streamers, Streamfund, Tokens, Videos } from "../types";
 
 type Fixture<T> = () => Promise<T>;
 
@@ -9,6 +9,7 @@ declare module "mocha" {
     // Contracts
     streamfund: Streamfund;
     tokens: Tokens;
+    videos: Videos;
     streamers: Streamers;
     loadFixture: <T>(fixture: Fixture<T>) => Promise<T>;
     signers: Signers;
