@@ -9,6 +9,7 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { PriceConverter } from "./PriceConverter.sol";
+import "hardhat/console.sol";
 
 contract Streamfund is AccessControl, Tokens, Videos, Streamers {
     using SafeERC20 for IERC20;
@@ -95,20 +96,28 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (block.chainid != 84532) {
             revert StreamfundValidationError("Only base sepolia chain is supported");
         }
-        uint8 tokenDecimal = PriceConverter.getDecimal(allowedTokens[_allowedToken].priceFeed);
-        uint256 usdPrice = getVideo(_videoId);
-        uint256 tokenPrice = PriceConverter.getPrice(allowedTokens[_allowedToken].priceFeed);
-        uint256 amount = (usdPrice * 1e18) / (tokenPrice * 1e18);
-        uint256 finalAmount = amount / (10 ** tokenDecimal);
+
+        // get token details
+        // AllowedToken memory details = _getTokenDetails(_allowedToken);
+        // console.log("Decimal: %s", details.decimal);
+
+        uint256 usdPrice = getVideo(_videoId) * 1e18;
+        // in order to make 18 decimals
+        uint256 tokenPrice = PriceConverter.getPrice(allowedTokens[_allowedToken].priceFeed) * (10 ** 10);
+        uint256 amount = (usdPrice * 1e18) / tokenPrice;
+
+        // console.log("USD Price: %s", usdPrice);
+        // console.log("Token Price: %s", tokenPrice);
+        // console.log("Amount: %s", amount);
 
         uint256 allowance = IERC20(_allowedToken).allowance(msg.sender, address(this));
-        if (allowance < finalAmount) {
+        if (allowance < amount) {
             revert StreamfundValidationError("Insufficient allowance");
         }
 
-        IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, finalAmount);
-        _addTokenSupport(_streamer, _allowedToken, finalAmount);
-        emit VideoSupportReceived(_streamer, msg.sender, _videoId, finalAmount, _message);
+        IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, amount);
+        _addTokenSupport(_streamer, _allowedToken, amount);
+        emit VideoSupportReceived(_streamer, msg.sender, _videoId, amount, _message);
     }
 
     function supportWithVideoETH(address _streamer, bytes32 _videoId, string memory _message) external payable {

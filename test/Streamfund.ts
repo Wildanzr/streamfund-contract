@@ -8,6 +8,7 @@ import type { Signers } from "./types";
 
 const KECCAK_EDITOR_ROLE = "0x21d1167972f621f75904fb065136bc8b53c7ba1c60ccd3a7758fbee465851e9c";
 const KECCAK_ADMIN_ROLE = "0x0000000000000000000000000000000000000000000000000000000000000000";
+const RANDOM_VIDEO_ID = "0x43641f4611acb863d4c0c0a3a261d365ea2db16589a2c5a97ef7f4591b5b774f";
 
 describe("Streamfund", function () {
   before(async function () {
@@ -310,8 +311,8 @@ describe("Streamfund", function () {
           this.deployedERC20[i].decimals(),
           this.deployedERC20[i].symbol(),
         ]);
-        await this.deployedERC20[i].connect(this.owner).mintTo(this.accounts[1].address, BigInt(0.1 * 10 ** 18));
-        await this.deployedERC20[i].connect(this.accounts[1]).mint();
+        await this.deployedERC20[i].connect(this.owner).mintTo(this.accounts[1].address, BigInt(10 * 10 ** 18));
+        // await this.deployedERC20[i].connect(this.accounts[1]).mint();
         if (i !== this.deployedERC20.length - 1) {
           await this.streamfund.addAllowedToken(tokenAddr, pfAddr, decimal, symbol);
         }
@@ -321,6 +322,83 @@ describe("Streamfund", function () {
       await this.streamfund.connect(this.accounts[0]).registerAsStreamer();
       const streamerCount = await this.streamfund.streamerCount();
       expect(streamerCount).to.be.equal(1);
+    });
+
+    it("Should failed to support because streamer is not registered", async function () {
+      const tokenAddr = await this.deployedERC20[0].getAddress();
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideo(this.accounts[1].address, RANDOM_VIDEO_ID, tokenAddr, "Thanks"),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because token is not allowed", async function () {
+      const tokenAddr = await this.deployedERC20[1].getAddress();
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideo(this.accounts[0].address, RANDOM_VIDEO_ID, tokenAddr, "Thanks"),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because videoId is not valid", async function () {
+      const tokenAddr = await this.deployedERC20[0].getAddress();
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideo(this.accounts[0].address, RANDOM_VIDEO_ID, tokenAddr, "Thanks"),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because message is too long", async function () {
+      const tokenAddr = await this.deployedERC20[0].getAddress();
+      const res = await this.streamfund.addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", 1);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+      console.log("Video ID: ", log.args[0]);
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideo(this.accounts[0].address, log.args[0], tokenAddr, "a".repeat(200)),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because token allowance is not enough", async function () {
+      const streamer = await this.accounts[0].getAddress();
+      const tokenAddr = await this.deployedERC20[0].getAddress();
+
+      const res = await this.streamfund.addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", 2000);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+
+      // 1    000000000000000000
+      // 0    500000000000000000
+      // 0    050000000000000000
+
+      await expect(
+        this.streamfund.connect(this.accounts[1]).supportWithVideo(streamer, log.args[0], tokenAddr, "Thanks"),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should support perfectly", async function () {
+      const streamer = await this.accounts[0].getAddress();
+      const tokenAddr = await this.deployedERC20[0].getAddress();
+      const videoPrice = 100;
+
+      const res = await this.streamfund
+        .connect(this.owner)
+        .addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", videoPrice);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+
+      await this.deployedERC20[0]
+        .connect(this.accounts[1])
+        .approve(await this.streamfund.getAddress(), BigInt(100 * 10 ** 18));
+
+      await expect(
+        this.streamfund.connect(this.accounts[1]).supportWithVideo(streamer, log.args[0], tokenAddr, "Thanks"),
+      ).to.be.emit(this.streamfund, "VideoSupportReceived");
     });
   });
 });

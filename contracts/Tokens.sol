@@ -107,4 +107,8 @@ contract Tokens is AccessControl {
     function _isTokenAvailable(address _tokenAddress) internal view returns (bool) {
         return allowedTokens[_tokenAddress].priceFeed != AggregatorV3Interface(address(0));
     }
+
+    function _getTokenDetails(address _tokenAddress) internal view returns (AllowedToken memory) {
+        return allowedTokens[_tokenAddress];
+    }
 }

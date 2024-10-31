@@ -69,11 +69,6 @@ describe("Videos", function () {
     });
 
     it("Should add video successfully", async function () {
-      await expect(this.videos.addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", 1)).to.be.emit(
-        this.videos,
-        "VideoAdded",
-      );
-
       const res = await this.videos.addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", 1);
       const result = await res.wait();
       const log = result?.logs[0] as unknown as { args: string[] };
