@@ -356,7 +356,6 @@ describe("Streamfund", function () {
       const res = await this.streamfund.addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", 1);
       const result = await res.wait();
       const log = result?.logs[0] as unknown as { args: string[] };
-      console.log("Video ID: ", log.args[0]);
       await expect(
         this.streamfund
           .connect(this.accounts[1])
@@ -371,10 +370,6 @@ describe("Streamfund", function () {
       const res = await this.streamfund.addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", 2000);
       const result = await res.wait();
       const log = result?.logs[0] as unknown as { args: string[] };
-
-      // 1    000000000000000000
-      // 0    500000000000000000
-      // 0    050000000000000000
 
       await expect(
         this.streamfund.connect(this.accounts[1]).supportWithVideo(streamer, log.args[0], tokenAddr, "Thanks"),
@@ -401,4 +396,130 @@ describe("Streamfund", function () {
       ).to.be.emit(this.streamfund, "VideoSupportReceived");
     });
   });
+
+  describe("Support with Video using ETH", function () {
+    this.beforeEach(async function () {
+      const { accounts, deployedERC20, deployedPriceFeed, streamfund, owner } =
+        await this.loadFixture(deployStreamfundFixture);
+
+      this.accounts = accounts;
+      this.streamfund = streamfund;
+      this.deployedERC20 = deployedERC20;
+      this.deployedPriceFeed = deployedPriceFeed;
+      this.owner = owner;
+
+      // Add some token and 1 for error testing
+      for (let i = 0; i < this.deployedERC20.length; i++) {
+        const [tokenAddr, pfAddr, decimal, symbol] = await Promise.all([
+          this.deployedERC20[i].getAddress(),
+          this.deployedPriceFeed[i].getAddress(),
+          this.deployedERC20[i].decimals(),
+          this.deployedERC20[i].symbol(),
+        ]);
+        await this.deployedERC20[i].connect(this.owner).mintTo(this.accounts[1].address, BigInt(10 * 10 ** 18));
+        // await this.deployedERC20[i].connect(this.accounts[1]).mint();
+        if (i !== this.deployedERC20.length - 1) {
+          await this.streamfund.addAllowedToken(tokenAddr, pfAddr, decimal, symbol);
+        }
+      }
+
+      const pfAddr = await this.deployedPriceFeed[0].getAddress();
+      await this.streamfund.addAllowedToken("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", pfAddr, 8, "ETH");
+
+      // Register one streamer
+      await this.streamfund.connect(this.accounts[0]).registerAsStreamer();
+      const streamerCount = await this.streamfund.streamerCount();
+      expect(streamerCount).to.be.equal(1);
+    });
+
+    it("Should failed to support because value is zero", async function () {
+      const videoPrice = 100;
+      const res = await this.streamfund
+        .connect(this.owner)
+        .addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", videoPrice);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+
+      await expect(
+        this.streamfund.connect(this.accounts[1]).supportWithVideoETH(this.accounts[0].address, log.args[0], "Thanks", {
+          value: 0,
+        }),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because streamer is not registered", async function () {
+      const videoPrice = 100;
+      const res = await this.streamfund
+        .connect(this.owner)
+        .addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", videoPrice);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+
+      await expect(
+        this.streamfund.connect(this.accounts[1]).supportWithVideoETH(this.accounts[4].address, log.args[0], "Thanks", {
+          value: parseEther("1"),
+        }),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because video is not exist", async function () {
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideoETH(this.accounts[0].address, RANDOM_VIDEO_ID, "Thanks", {
+            value: parseEther("1"),
+          }),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because message is too long", async function () {
+      const videoPrice = 100;
+      const res = await this.streamfund
+        .connect(this.owner)
+        .addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", videoPrice);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideoETH(this.accounts[0].address, log.args[0], "a".repeat(200), {
+            value: parseEther("1"),
+          }),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because value is too low", async function () {
+      const videoPrice = 1000;
+      const res = await this.streamfund
+        .connect(this.owner)
+        .addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", videoPrice);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideoETH(this.accounts[0].address, log.args[0], "Thanks", { value: parseEther("0.0001") }),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should support perfectly", async function () {
+      const videoPrice = 1000;
+      const res = await this.streamfund
+        .connect(this.owner)
+        .addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", videoPrice);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideoETH(this.accounts[0].address, log.args[0], "Thanks", { value: parseEther("1") }),
+      ).to.be.emit(this.streamfund, "VideoSupportReceived");
+    });
+  });
 });
+
+// 1000000000000000000
+//  500000000000000000

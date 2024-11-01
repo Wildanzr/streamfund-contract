@@ -98,10 +98,10 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         }
 
         // get token details
-        // AllowedToken memory details = _getTokenDetails(_allowedToken);
+        AllowedToken memory details = _getTokenDetails(_allowedToken);
         // console.log("Decimal: %s", details.decimal);
 
-        uint256 usdPrice = getVideo(_videoId) * 1e18;
+        uint256 usdPrice = getVideo(_videoId) * (10 ** 18 - details.decimal);
         // in order to make 18 decimals
         uint256 tokenPrice = PriceConverter.getPrice(allowedTokens[_allowedToken].priceFeed) * (10 ** 10);
         uint256 amount = (usdPrice * 1e18) / tokenPrice;
@@ -137,11 +137,20 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
             revert StreamfundValidationError("Only base sepolia chain is supported");
         }
 
-        uint256 usdPrice = getVideo(_videoId);
+        uint256 usdPrice = getVideo(_videoId) * 1e18;
         uint256 tokenPrice = PriceConverter.getPrice(
             allowedTokens[0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE].priceFeed
-        );
-        uint256 amount = (usdPrice * 1e18) / (tokenPrice * 1e18);
+        ) * (10 ** 10);
+        uint256 amount = (usdPrice * 1e18) / tokenPrice;
+
+        // console.log("USD Price: %s", usdPrice);
+        // console.log("Token Price: %s", tokenPrice);
+        // console.log("Amount: %s", amount);
+        // console.log("msg.value: %s", msg.value);
+
+        if (msg.value < amount) {
+            revert StreamfundValidationError("Insufficient amount");
+        }
 
         payable(_streamer).transfer(msg.value);
         _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, amount);
