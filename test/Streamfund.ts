@@ -329,7 +329,7 @@ describe("Streamfund", function () {
       await expect(
         this.streamfund
           .connect(this.accounts[1])
-          .supportWithVideo(this.accounts[1].address, RANDOM_VIDEO_ID, tokenAddr, "Thanks"),
+          .supportWithVideo(this.accounts[1].address, RANDOM_VIDEO_ID, tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
       ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
     });
 
@@ -338,7 +338,7 @@ describe("Streamfund", function () {
       await expect(
         this.streamfund
           .connect(this.accounts[1])
-          .supportWithVideo(this.accounts[0].address, RANDOM_VIDEO_ID, tokenAddr, "Thanks"),
+          .supportWithVideo(this.accounts[0].address, RANDOM_VIDEO_ID, tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
       ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
     });
 
@@ -347,7 +347,7 @@ describe("Streamfund", function () {
       await expect(
         this.streamfund
           .connect(this.accounts[1])
-          .supportWithVideo(this.accounts[0].address, RANDOM_VIDEO_ID, tokenAddr, "Thanks"),
+          .supportWithVideo(this.accounts[0].address, RANDOM_VIDEO_ID, tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
       ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
     });
 
@@ -359,7 +359,7 @@ describe("Streamfund", function () {
       await expect(
         this.streamfund
           .connect(this.accounts[1])
-          .supportWithVideo(this.accounts[0].address, log.args[0], tokenAddr, "a".repeat(200)),
+          .supportWithVideo(this.accounts[0].address, log.args[0], tokenAddr, BigInt(1 * 10 ** 18), "a".repeat(200)),
       ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
     });
 
@@ -372,7 +372,31 @@ describe("Streamfund", function () {
       const log = result?.logs[0] as unknown as { args: string[] };
 
       await expect(
-        this.streamfund.connect(this.accounts[1]).supportWithVideo(streamer, log.args[0], tokenAddr, "Thanks"),
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideo(streamer, log.args[0], tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
+      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
+    });
+
+    it("Should failed to support because amount is not sufficient", async function () {
+      const streamer = await this.accounts[0].getAddress();
+      const tokenAddr = await this.deployedERC20[0].getAddress();
+      const videoPrice = 100000;
+
+      const res = await this.streamfund
+        .connect(this.owner)
+        .addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", videoPrice);
+      const result = await res.wait();
+      const log = result?.logs[0] as unknown as { args: string[] };
+
+      await this.deployedERC20[0]
+        .connect(this.accounts[1])
+        .approve(await this.streamfund.getAddress(), BigInt(100 * 10 ** 18));
+
+      await expect(
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideo(streamer, log.args[0], tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
       ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
     });
 
@@ -392,7 +416,9 @@ describe("Streamfund", function () {
         .approve(await this.streamfund.getAddress(), BigInt(100 * 10 ** 18));
 
       await expect(
-        this.streamfund.connect(this.accounts[1]).supportWithVideo(streamer, log.args[0], tokenAddr, "Thanks"),
+        this.streamfund
+          .connect(this.accounts[1])
+          .supportWithVideo(streamer, log.args[0], tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
       ).to.be.emit(this.streamfund, "VideoSupportReceived");
     });
   });

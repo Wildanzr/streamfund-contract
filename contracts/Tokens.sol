@@ -12,7 +12,7 @@ contract Tokens is AccessControl {
     struct AllowedToken {
         AggregatorV3Interface priceFeed;
         uint256 index;
-        uint8 decimal;
+        uint256 decimal;
         string symbol;
     }
 
@@ -27,7 +27,7 @@ contract Tokens is AccessControl {
 
     error TokenValidationError(string message);
 
-    event TokenAdded(address tokenAddress, address priceFeed, uint8 decimal, string symbol);
+    event TokenAdded(address tokenAddress, address priceFeed, uint256 decimal, string symbol);
     event TokenRemoved(address tokenAddress);
 
     /**
@@ -40,7 +40,7 @@ contract Tokens is AccessControl {
     function addAllowedToken(
         address _tokenAddress,
         address _priceFeed,
-        uint8 _decimal,
+        uint256 _decimal,
         string memory _symbol
     ) external onlyRole(EDITOR_ROLE) {
         if (_tokenAddress == address(0) || _priceFeed == address(0)) {

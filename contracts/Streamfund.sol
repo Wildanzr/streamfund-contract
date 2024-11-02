@@ -35,9 +35,9 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        if (block.chainid != 84532) {
-            revert StreamfundValidationError("Only base sepolia chain is supported");
-        }
+        // if (block.chainid != 84532) {
+        //     revert StreamfundValidationError("Only base sepolia chain is supported");
+        // }
 
         payable(_streamer).transfer(msg.value);
         _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value);
@@ -62,9 +62,9 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        if (block.chainid != 84532) {
-            revert StreamfundValidationError("Only base sepolia chain is supported");
-        }
+        // if (block.chainid != 84532) {
+        //     revert StreamfundValidationError("Only base sepolia chain is supported");
+        // }
         uint256 allowance = IERC20(_allowedToken).allowance(msg.sender, address(this));
         if (allowance < amount) {
             revert StreamfundValidationError("Insufficient allowance");
@@ -79,6 +79,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         address _streamer,
         bytes32 _videoId,
         address _allowedToken,
+        uint256 _amount,
         string memory _message
     ) external {
         if (!_isStreamerExist(_streamer)) {
@@ -93,31 +94,28 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        if (block.chainid != 84532) {
-            revert StreamfundValidationError("Only base sepolia chain is supported");
+        // if (block.chainid != 84532) {
+        //     revert StreamfundValidationError("Only base sepolia chain is supported");
+        // }
+
+        AllowedToken memory details = _getTokenDetails(_allowedToken);
+        uint256 pfDecimal = uint256(PriceConverter.getDecimal(details.priceFeed));
+
+        uint256 usdPrice = getVideo(_videoId) * 10 ** 18;
+        uint256 tokenPrice = PriceConverter.getPrice(details.priceFeed) * 10 ** (18 - pfDecimal);
+        uint256 costToSupport = (usdPrice * 10 ** 18) / tokenPrice;
+        if (_amount < costToSupport) {
+            revert StreamfundValidationError("Insufficient amount");
         }
 
-        // get token details
-        AllowedToken memory details = _getTokenDetails(_allowedToken);
-        // console.log("Decimal: %s", details.decimal);
-
-        uint256 usdPrice = getVideo(_videoId) * (10 ** 18 - details.decimal);
-        // in order to make 18 decimals
-        uint256 tokenPrice = PriceConverter.getPrice(allowedTokens[_allowedToken].priceFeed) * (10 ** 10);
-        uint256 amount = (usdPrice * 1e18) / tokenPrice;
-
-        // console.log("USD Price: %s", usdPrice);
-        // console.log("Token Price: %s", tokenPrice);
-        // console.log("Amount: %s", amount);
-
         uint256 allowance = IERC20(_allowedToken).allowance(msg.sender, address(this));
-        if (allowance < amount) {
+        if (allowance < _amount) {
             revert StreamfundValidationError("Insufficient allowance");
         }
 
-        IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, amount);
-        _addTokenSupport(_streamer, _allowedToken, amount);
-        emit VideoSupportReceived(_streamer, msg.sender, _videoId, amount, _message);
+        IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, _amount);
+        _addTokenSupport(_streamer, _allowedToken, _amount);
+        emit VideoSupportReceived(_streamer, msg.sender, _videoId, _amount, _message);
     }
 
     function supportWithVideoETH(address _streamer, bytes32 _videoId, string memory _message) external payable {
@@ -133,9 +131,9 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        if (block.chainid != 84532) {
-            revert StreamfundValidationError("Only base sepolia chain is supported");
-        }
+        // if (block.chainid != 84532) {
+        //     revert StreamfundValidationError("Only base sepolia chain is supported");
+        // }
 
         uint256 usdPrice = getVideo(_videoId) * 1e18;
         uint256 tokenPrice = PriceConverter.getPrice(
