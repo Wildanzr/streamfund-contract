@@ -65,7 +65,8 @@ contract Videos is AccessControl {
 
     /**
      * @notice Generates a random bytes32 value.
-     * @dev This function is sufficient for generating a random string for video IDs, not for lotteries or high-stakes randomness.
+     * @dev This function is sufficient for generating a random string for video IDs,
+     * not for lotteries or high-stakes randomness.
      * @return A random bytes32 value.
      */
     function _generateRandomBytes32() private view returns (bytes32) {

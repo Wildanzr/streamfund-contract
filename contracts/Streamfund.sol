@@ -9,7 +9,6 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { PriceConverter } from "./PriceConverter.sol";
-import "hardhat/console.sol";
 
 contract Streamfund is AccessControl, Tokens, Videos, Streamers {
     using SafeERC20 for IERC20;
@@ -33,7 +32,8 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
      * @dev The amount of ETH sent must be greater than zero.
      * @dev The streamer must be registered.
      * @dev Emits a {SupportReceived} event.
-     * @custom:error StreamfundValidationError if the amount is zero, the streamer is not registered, or the message is too long.
+     * @custom:error StreamfundValidationError if the amount is zero, the streamer
+     * is not registered, or the message is too long.
      */
     function supportWithETH(address _streamer, string memory _message) external payable {
         if (msg.value == 0) {
@@ -65,7 +65,8 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
      * @dev The streamer must be registered.
      * @dev The token must be allowed.
      * @dev Emits a {SupportReceived} event.
-     * @custom:error StreamfundValidationError if the amount is zero, the streamer is not registered, the token is not allowed, the message is too long, or the allowance is insufficient.
+     * @custom:error StreamfundValidationError if the amount is zero, the streamer
+     * is not registered, the token is not allowed, the message is too long, or the allowance is insufficient.
      */
     function supportWithToken(
         address _streamer,
@@ -107,7 +108,8 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
      * @dev The amount of ETH sent must be greater than or equal to the cost to support the video.
      * @dev The streamer and video must be registered.
      * @dev Emits a {VideoSupportReceived} event.
-     * @custom:error StreamfundValidationError if the amount is insufficient, the streamer or video is not registered, or the message is too long.
+     * @custom:error StreamfundValidationError if the amount is insufficient, the streamer
+     * or video is not registered, or the message is too long.
      */
     function supportWithVideoETH(address _streamer, bytes32 _videoId, string memory _message) external payable {
         if (msg.value == 0) {
@@ -151,7 +153,9 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
      * @dev The amount of tokens sent must be greater than or equal to the cost to support the video.
      * @dev The streamer and video must be registered, and the token must be allowed.
      * @dev Emits a {VideoSupportReceived} event.
-     * @custom:error StreamfundValidationError if the amount is insufficient, the streamer or video is not registered, the token is not allowed, the message is too long, or the allowance is insufficient.
+     * @custom:error StreamfundValidationError if the amount is insufficient, the streamer
+     * or video is not registered, the token is not allowed, the message is too long,
+     * or the allowance is insufficient.
      */
     function supportWithVideo(
         address _streamer,
@@ -196,6 +200,17 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         emit VideoSupportReceived(_streamer, msg.sender, _videoId, _amount, _message);
     }
 
+    /**
+     * @notice Support a streamer with live ads using ETH.
+     * @param _streamer The address of the streamer to support.
+     * @param _message A message to send along with the support.
+     * @dev The message length must be less than or equal to 150 bytes.
+     * @dev The amount of ETH sent must be greater than or equal to the cost to support the live ads.
+     * @dev The streamer must be registered.
+     * @dev Emits a {LiveAdsReceived} event.
+     * @custom:error StreamfundValidationError if the amount is insufficient, the streamer
+     * is not registered, or the message is too long.
+     */
     function liveAdsWithETH(address _streamer, string memory _message) external payable {
         if (!_isStreamerExist(_streamer)) {
             revert StreamfundValidationError("Streamer not registered");
@@ -225,6 +240,20 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         emit LiveAdsReceived(_streamer, msg.sender, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value, _message);
     }
 
+    /**
+     * @notice Support a streamer with live ads using a specific ERC20 token.
+     * @param _streamer The address of the streamer to support.
+     * @param _allowedToken The address of the ERC20 token to use for support.
+     * @param _amount The amount of tokens to send.
+     * @param _message A message to send along with the support.
+     * @dev The message length must be less than or equal to 150 bytes.
+     * @dev The amount of tokens sent must be greater than or equal to the cost to support the live ads.
+     * @dev The streamer and token must be registered.
+     * @dev Emits a {LiveAdsReceived} event.
+     * @custom:error StreamfundValidationError if the amount is insufficient, the
+     * streamer is not registered, the token is not allowed, the message is too long,
+     * or the allowance is insufficient.
+     */
     function liveAdsWithToken(
         address _streamer,
         address _allowedToken,
