@@ -13,7 +13,7 @@ contract Streamers {
     }
 
     struct Streamer {
-        uint8 liveAdsPrice;
+        uint256 liveAdsPrice;
         address streamer;
         TokenSupport[] cumulative;
     }
@@ -24,7 +24,7 @@ contract Streamers {
 
     error StreamerValidationError(string message);
     event StreamerRegistered(address streamer);
-    event StreamerUpdated(address streamer, uint8 liveAdsPrice);
+    event StreamerUpdated(address streamer, uint256 liveAdsPrice);
 
     /**
      * @notice Registers the caller as a streamer.
@@ -52,7 +52,7 @@ contract Streamers {
      * @dev Reverts with {StreamerValidationError} if the caller is not registered.
      * @param _price The new live ads price.
      */
-    function updateLiveAdsPrice(uint8 _price) public {
+    function updateLiveAdsPrice(uint256 _price) public {
         if (!_isStreamerExist(msg.sender)) {
             revert StreamerValidationError("Streamer not registered.");
         }
@@ -67,7 +67,7 @@ contract Streamers {
      * @param _streamer The address of the streamer.
      * @return The index of the streamer and an array of TokenSupport.
      */
-    function getStreamerDetails(address _streamer) public view returns (uint256, uint8, TokenSupport[] memory) {
+    function getStreamerDetails(address _streamer) public view returns (uint256, uint256, TokenSupport[] memory) {
         if (!_isStreamerExist(_streamer)) {
             return (0, 0, new TokenSupport[](0));
         }
