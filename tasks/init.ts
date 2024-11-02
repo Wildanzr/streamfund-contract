@@ -16,7 +16,7 @@ task("task:add", "Add initial allowed token to Streamfund").setAction(async func
   { ethers },
 ) {
   const signers = await ethers.getSigners();
-  const streamfundAddress = "0x93d6e32824e24C195b0497381b016927bA042985";
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
 
   const candidate: AllowedToken[] = [
     {
@@ -26,22 +26,10 @@ task("task:add", "Add initial allowed token to Streamfund").setAction(async func
       symbol: "ETH",
     },
     {
-      address: "0x4D658F958EB5572a9598B538f36D74B32982b10c",
-      priceFeed: "0x3ec8593F930EA45ea58c968260e6e9FF53FC934f",
-      decimal: 6,
-      symbol: "USDT",
-    },
-    {
-      address: "0x6EC8457cf49A5791Cb6dE61bfF214CEfFae0a0fD",
+      address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
       priceFeed: "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165",
       decimal: 6,
       symbol: "USDC",
-    },
-    {
-      address: "0xD13eb86Da7bbf8E96656f319d5b856B382ab5098",
-      priceFeed: "0xD1092a65338d049DB68D7Be6bD89d17a0929945e",
-      decimal: 18,
-      symbol: "DAI",
     },
   ];
 
@@ -63,7 +51,7 @@ task("task:remove", "Remove initial allowed token to Streamfund").setAction(asyn
   { ethers },
 ) {
   const signers = await ethers.getSigners();
-  const streamfundAddress = "0x93d6e32824e24C195b0497381b016927bA042985";
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
 
   const candidate: AllowedToken[] = [
     {
@@ -73,22 +61,10 @@ task("task:remove", "Remove initial allowed token to Streamfund").setAction(asyn
       symbol: "ETH",
     },
     {
-      address: "0xD48D9f155bEfca237B13e7EAB15425aa92AB2EcE",
-      priceFeed: "0x3ec8593F930EA45ea58c968260e6e9FF53FC934f",
-      decimal: 6,
-      symbol: "USDT",
-    },
-    {
-      address: "0xF1e1339E419363d6e9cEf918E040D1c077D396E8",
+      address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
       priceFeed: "0xd30e2101a97dcbAeBCBC04F14C3f624E67A35165",
       decimal: 6,
       symbol: "USDC",
-    },
-    {
-      address: "0x2a0855d7D014c039cD67A6246F742b92bb761E0E",
-      priceFeed: "0xD1092a65338d049DB68D7Be6bD89d17a0929945e",
-      decimal: 18,
-      symbol: "DAI",
     },
   ];
 
@@ -103,7 +79,7 @@ task("task:remove", "Remove initial allowed token to Streamfund").setAction(asyn
 
 task("task:support", "Give support to streamer").setAction(async function (taskArguments: TaskArguments, { ethers }) {
   const signers = await ethers.getSigners();
-  const streamfundAddress = "0x93d6e32824e24C195b0497381b016927bA042985";
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
 
   const streamer = "0x53462C7a8b5ad31F0eac94C79E0c341081E4Bfb7";
   const amount1 = parseEther("0.0000011");
@@ -128,12 +104,87 @@ task("task:support", "Give support to streamer").setAction(async function (taskA
   console.log(`Tx hash: ${tx4.hash}`);
 });
 
-task("task:register", "Get streamer details").setAction(async function (taskArguments: TaskArguments, { ethers }) {
-  const streamfundAddress = "0x93d6e32824e24C195b0497381b016927bA042985";
-  const streamer = "0x53462C7a8b5ad31F0eac94C79E0c341081E4Bfb7";
+task("task:updateLiveAds", "Update live ads").setAction(async function (taskArguments: TaskArguments, { ethers }) {
+  const signers = await ethers.getSigners();
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
 
-  console.log("Looking for streamer ", streamer);
   const streamfund = (await ethers.getContractAt("Streamfund", streamfundAddress)) as Streamfund;
-  const details = await streamfund.getStreamerDetails(streamer);
-  console.log(details);
+  const tx = await streamfund.connect(signers[0]).updateLiveAdsPrice(1);
+  console.log(`Tx hash: ${tx.hash}`);
+
+  await tx.wait();
+  console.log("Live ads price updated");
+});
+
+task("task:liveAdsETH", "Perform live ads").setAction(async function (taskArguments: TaskArguments, { ethers }) {
+  const signers = await ethers.getSigners();
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
+  const streamer = signers[0].address;
+
+  const streamfund = (await ethers.getContractAt("Streamfund", streamfundAddress)) as Streamfund;
+  const tx = await streamfund.connect(signers[0]).liveAdsWithETH(streamer, "GM", {
+    value: parseEther("0.01"),
+  });
+  console.log(`Tx hash: ${tx.hash}`);
+
+  await tx.wait();
+  console.log("Live ads performed");
+});
+
+task("task:liveAdsToken", "Perform live ads with token").setAction(async function (
+  taskArguments: TaskArguments,
+  { ethers },
+) {
+  const signers = await ethers.getSigners();
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
+  const USDCOnBase = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+  const streamer = signers[0].address;
+
+  const streamfund = (await ethers.getContractAt("Streamfund", streamfundAddress)) as Streamfund;
+  const tx = await streamfund.connect(signers[0]).liveAdsWithToken(streamer, USDCOnBase, BigInt(2 * 10 ** 6), "GM");
+  console.log(`Tx hash: ${tx.hash}`);
+
+  await tx.wait();
+  console.log("Live ads performed");
+});
+
+task("task:addVideo", "Add video to Streamfund").setAction(async function (taskArguments: TaskArguments, { ethers }) {
+  const signers = await ethers.getSigners();
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
+
+  const streamfund = (await ethers.getContractAt("Streamfund", streamfundAddress)) as Streamfund;
+  const tx = await streamfund.connect(signers[0]).addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", 2);
+  console.log(`Tx hash: ${tx.hash}`);
+
+  await tx.wait();
+  console.log("Video added");
+});
+
+task("task:removeVideo", "Remove video from Streamfund").setAction(async function (
+  taskArguments: TaskArguments,
+  { ethers },
+) {
+  const signers = await ethers.getSigners();
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
+  const videoId = "0x15B99385560E0C112DA847CD24AB34CC6FA6A5F5213D084617362629CB292FD9";
+
+  const streamfund = (await ethers.getContractAt("Streamfund", streamfundAddress)) as Streamfund;
+  const tx = await streamfund.connect(signers[0]).removeVideo(videoId);
+  console.log(`Tx hash: ${tx.hash}`);
+
+  await tx.wait();
+  console.log("Video removed");
+});
+
+task("task:register", "Register as streamer").setAction(async function (taskArguments: TaskArguments, { ethers }) {
+  const signers = await ethers.getSigners();
+  const streamfundAddress = "0x63B02bDcA6e209ff0A8dab2E3B244820aE8013f1";
+
+  console.log("Registering as streamer...");
+  const streamfund = (await ethers.getContractAt("Streamfund", streamfundAddress)) as Streamfund;
+  const tx = await streamfund.connect(signers[0]).registerAsStreamer();
+  console.log(`Tx hash: ${tx.hash}`);
+
+  await tx.wait();
+  console.log("Registered as streamer");
 });
