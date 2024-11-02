@@ -135,24 +135,19 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         //     revert StreamfundValidationError("Only base sepolia chain is supported");
         // }
 
-        uint256 usdPrice = getVideo(_videoId) * 1e18;
-        uint256 tokenPrice = PriceConverter.getPrice(
-            allowedTokens[0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE].priceFeed
-        ) * (10 ** 10);
-        uint256 amount = (usdPrice * 1e18) / tokenPrice;
+        AllowedToken memory details = _getTokenDetails(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
+        uint256 pfDecimal = uint256(PriceConverter.getDecimal(details.priceFeed));
 
-        // console.log("USD Price: %s", usdPrice);
-        // console.log("Token Price: %s", tokenPrice);
-        // console.log("Amount: %s", amount);
-        // console.log("msg.value: %s", msg.value);
-
-        if (msg.value < amount) {
+        uint256 usdPrice = getVideo(_videoId) * 10 ** 18;
+        uint256 tokenPrice = PriceConverter.getPrice(details.priceFeed) * 10 ** (18 - pfDecimal);
+        uint256 costToSupport = (usdPrice * 10 ** 18) / tokenPrice;
+        if (msg.value < costToSupport) {
             revert StreamfundValidationError("Insufficient amount");
         }
 
         payable(_streamer).transfer(msg.value);
-        _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, amount);
-        emit VideoSupportReceived(_streamer, msg.sender, _videoId, amount, _message);
+        _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value);
+        emit VideoSupportReceived(_streamer, msg.sender, _videoId, msg.value, _message);
     }
 
     function getAllowedTokenPrice(address _token) external view returns (uint256, uint8) {

@@ -414,12 +414,15 @@ describe("Streamfund", function () {
       await this.deployedERC20[0]
         .connect(this.accounts[1])
         .approve(await this.streamfund.getAddress(), BigInt(100 * 10 ** 18));
+      const streamerPreBalance = await this.deployedERC20[0].balanceOf(streamer);
 
       await expect(
         this.streamfund
           .connect(this.accounts[1])
           .supportWithVideo(streamer, log.args[0], tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
       ).to.be.emit(this.streamfund, "VideoSupportReceived");
+      const streamerPostBalance = await this.deployedERC20[0].balanceOf(streamer);
+      expect(streamerPostBalance).to.be.equal(streamerPreBalance + BigInt(1 * 10 ** 18));
     });
   });
 
@@ -537,15 +540,16 @@ describe("Streamfund", function () {
         .addVideo("https://video.com/1.mp4", "https://thumbnail.com/1.jpg", videoPrice);
       const result = await res.wait();
       const log = result?.logs[0] as unknown as { args: string[] };
+      const streamerPreBalance = await ethers.provider.getBalance(this.accounts[0]);
 
       await expect(
         this.streamfund
           .connect(this.accounts[1])
           .supportWithVideoETH(this.accounts[0].address, log.args[0], "Thanks", { value: parseEther("1") }),
       ).to.be.emit(this.streamfund, "VideoSupportReceived");
+
+      const streamerPostBalance = await ethers.provider.getBalance(this.accounts[0]);
+      expect(streamerPostBalance).to.be.equal(streamerPreBalance + parseEther("1"));
     });
   });
 });
-
-// 1000000000000000000
-//  500000000000000000
