@@ -54,6 +54,29 @@ describe("Streamers", function () {
     });
   });
 
+  describe("Update live ads price", function () {
+    this.beforeEach(async function () {
+      const { streamers, accounts } = await this.loadFixture(deployStreamersFixture);
+
+      this.streamers = streamers;
+      this.accounts = accounts;
+    });
+
+    it("Should failed to update live ads price because streamer is not registered", async function () {
+      await expect(this.streamers.connect(this.accounts[0]).updateLiveAdsPrice(100)).to.be.revertedWithCustomError(
+        this.streamers,
+        "StreamerValidationError",
+      );
+    });
+
+    it("Should update live ads perfectly", async function () {
+      await this.streamers.connect(this.accounts[0]).registerAsStreamer();
+      await this.streamers.connect(this.accounts[0]).updateLiveAdsPrice(100);
+      const streamer = await this.streamers.getStreamerDetails(this.accounts[0].address);
+      expect(streamer[1]).to.be.equal(BigInt(100));
+    });
+  });
+
   describe("Get streamer details", function () {
     this.beforeEach(async function () {
       const { streamers, accounts } = await this.loadFixture(deployStreamersFixture);
@@ -70,7 +93,7 @@ describe("Streamers", function () {
     it("Should get streamer details perfectly", async function () {
       await this.streamers.connect(this.accounts[0]).registerAsStreamer();
       const streamer = await this.streamers.getStreamerDetails(this.accounts[0].address);
-      expect(streamer[1][0][0]).to.be.equal("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE");
+      expect(streamer[2][0][0]).to.be.equal("0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE");
     });
   });
 });

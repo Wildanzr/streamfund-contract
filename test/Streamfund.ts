@@ -90,7 +90,7 @@ describe("Streamfund", function () {
 
       const postBalance = await ethers.provider.getBalance(this.accounts[0]);
       const streamerDetails = await this.streamfund.getStreamerDetails(this.accounts[0].address);
-      expect(streamerDetails[1][0][1]).to.be.equal(parseEther("1"));
+      expect(streamerDetails[2][0][1]).to.be.equal(parseEther("1"));
       expect(postBalance).to.be.equal(preBalance + parseEther("1"));
     });
   });
