@@ -26,7 +26,7 @@ task("task:add", "Add initial allowed token to Streamfund").setAction(async func
       symbol: "ETH",
     },
     {
-      address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
       priceFeed: "0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E",
       decimal: 6,
       symbol: "USDC",
@@ -61,7 +61,7 @@ task("task:remove", "Remove initial allowed token to Streamfund").setAction(asyn
       symbol: "ETH",
     },
     {
-      address: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+      address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
       priceFeed: "0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E",
       decimal: 6,
       symbol: "USDC",
@@ -122,11 +122,11 @@ task("task:liveAdsToken", "Perform live ads with token").setAction(async functio
 ) {
   const signers = await ethers.getSigners();
   const streamfundAddress = "0xcaFcAF4Aa0949dA2d3D3b303291c951301B75821";
-  const USDCOnBase = "0x036CbD53842c5426634e7929541eC2318f3dCF7e";
+  const USDCOnSepolia = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
   const streamer = signers[0].address;
 
   const streamfund = (await ethers.getContractAt("Streamfund", streamfundAddress)) as Streamfund;
-  const tx = await streamfund.connect(signers[0]).liveAdsWithToken(streamer, USDCOnBase, BigInt(2 * 10 ** 6), "GM");
+  const tx = await streamfund.connect(signers[0]).liveAdsWithToken(streamer, USDCOnSepolia, BigInt(2 * 10 ** 6), "GM");
   console.log(`Tx hash: ${tx.hash}`);
 
   await tx.wait();
