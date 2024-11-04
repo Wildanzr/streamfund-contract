@@ -22,7 +22,14 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
     error StreamfundValidationError(string message);
     event SupportReceived(address indexed streamer, address from, address token, uint256 amount, string message);
     event LiveAdsReceived(address indexed streamer, address from, address token, uint256 amount, string message);
-    event VideoSupportReceived(address indexed streamer, address from, bytes32 videoId, uint256 amount, string message);
+    event VideoSupportReceived(
+        address indexed streamer,
+        address from,
+        bytes32 videoId,
+        address token,
+        uint256 amount,
+        string message
+    );
 
     /**
      * @notice Support a streamer with ETH.
@@ -45,7 +52,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        // if (block.chainid != 84532) {
+        // if (block.chainid != 11155111) {
         //     revert StreamfundValidationError("Only base sepolia chain is supported");
         // }
 
@@ -86,7 +93,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        // if (block.chainid != 84532) {
+        // if (block.chainid != 11155111) {
         //     revert StreamfundValidationError("Only base sepolia chain is supported");
         // }
         uint256 allowance = IERC20(_allowedToken).allowance(msg.sender, address(this));
@@ -124,7 +131,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        // if (block.chainid != 84532) {
+        // if (block.chainid != 11155111) {
         //     revert StreamfundValidationError("Only base sepolia chain is supported");
         // }
 
@@ -139,7 +146,14 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
 
         payable(_streamer).transfer(msg.value);
         _addTokenSupport(_streamer, 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE, msg.value);
-        emit VideoSupportReceived(_streamer, msg.sender, _videoId, msg.value, _message);
+        emit VideoSupportReceived(
+            _streamer,
+            msg.sender,
+            _videoId,
+            0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE,
+            msg.value,
+            _message
+        );
     }
 
     /**
@@ -176,7 +190,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        // if (block.chainid != 84532) {
+        // if (block.chainid != 11155111) {
         //     revert StreamfundValidationError("Only base sepolia chain is supported");
         // }
 
@@ -197,7 +211,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
 
         IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, _amount);
         _addTokenSupport(_streamer, _allowedToken, _amount);
-        emit VideoSupportReceived(_streamer, msg.sender, _videoId, _amount, _message);
+        emit VideoSupportReceived(_streamer, msg.sender, _videoId, _allowedToken, _amount, _message);
     }
 
     /**
@@ -218,7 +232,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        // if (block.chainid != 84532) {
+        // if (block.chainid != 11155111) {
         //     revert StreamfundValidationError("Only base sepolia chain is supported");
         // }
 
@@ -269,7 +283,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        // if (block.chainid != 84532) {
+        // if (block.chainid != 11155111) {
         //     revert StreamfundValidationError("Only base sepolia chain is supported");
         // }
         AllowedToken memory details = _getTokenDetails(_allowedToken);
