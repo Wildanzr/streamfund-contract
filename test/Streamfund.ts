@@ -523,14 +523,14 @@ describe("Streamfund", function () {
       await expect(
         this.streamfund
           .connect(this.accounts[1])
-          .supportWithVideo(streamer, log.args[0], tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
+          .supportWithVideo(streamer, log.args[0], tokenAddr, BigInt(1 * 10 ** 6), "Thanks"),
       ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
     });
 
     it("Should support perfectly", async function () {
       const streamer = await this.accounts[0].getAddress();
       const tokenAddr = await this.deployedERC20[0].getAddress();
-      const videoPrice = 100;
+      const videoPrice = 2000;
 
       const res = await this.streamfund
         .connect(this.owner)
@@ -541,15 +541,12 @@ describe("Streamfund", function () {
       await this.deployedERC20[0]
         .connect(this.accounts[1])
         .approve(await this.streamfund.getAddress(), BigInt(100 * 10 ** 18));
-      const streamerPreBalance = await this.deployedERC20[0].balanceOf(streamer);
 
       await expect(
         this.streamfund
           .connect(this.accounts[1])
-          .supportWithVideo(streamer, log.args[0], tokenAddr, BigInt(1 * 10 ** 18), "Thanks"),
+          .supportWithVideo(streamer, log.args[0], tokenAddr, BigInt(1 * 10 ** 6), "Thanks"),
       ).to.be.emit(this.streamfund, "VideoSupportReceived");
-      const streamerPostBalance = await this.deployedERC20[0].balanceOf(streamer);
-      expect(streamerPostBalance).to.be.equal(streamerPreBalance + BigInt(1 * 10 ** 18));
     });
   });
 

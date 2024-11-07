@@ -9,6 +9,7 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { PriceConverter } from "./PriceConverter.sol";
+import "hardhat/console.sol";
 
 contract Streamfund is AccessControl, Tokens, Videos, Streamers {
     using SafeERC20 for IERC20;
@@ -197,9 +198,9 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         AllowedToken memory details = _getTokenDetails(_allowedToken);
         uint256 pfDecimal = uint256(PriceConverter.getDecimal(details.priceFeed));
 
-        uint256 usdPrice = getVideo(_videoId) * 10 ** 18;
-        uint256 tokenPrice = PriceConverter.getPrice(details.priceFeed) * 10 ** (18 - pfDecimal);
-        uint256 costToSupport = (usdPrice * 10 ** 18) / tokenPrice;
+        uint256 usdPrice = getVideo(_videoId) * 10 ** 6;
+        uint256 tokenPrice = PriceConverter.getPrice(details.priceFeed) / 10 ** (pfDecimal - 6);
+        uint256 costToSupport = (usdPrice * 10 ** 6) / tokenPrice;
         if (_amount < costToSupport) {
             revert StreamfundValidationError("Insufficient amount");
         }
@@ -245,6 +246,7 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         uint256 usdPrice = liveAdsPrice * 10 ** 18;
         uint256 tokenPrice = PriceConverter.getPrice(details.priceFeed) * 10 ** (18 - pfDecimal);
         uint256 costToSupport = (usdPrice * 10 ** 18) / tokenPrice;
+
         if (msg.value < costToSupport) {
             revert StreamfundValidationError("Insufficient amount");
         }
@@ -286,15 +288,16 @@ contract Streamfund is AccessControl, Tokens, Videos, Streamers {
         // if (block.chainid != 11155111) {
         //     revert StreamfundValidationError("Only base sepolia chain is supported");
         // }
+
         AllowedToken memory details = _getTokenDetails(_allowedToken);
         uint256 pfDecimal = uint256(PriceConverter.getDecimal(details.priceFeed));
         (, uint256 liveAdsPrice, ) = getStreamerDetails(_streamer);
         if (liveAdsPrice == 0) {
             revert StreamfundValidationError("Streamer not set live ads price");
         }
-        uint256 usdPrice = liveAdsPrice * 10 ** 18;
-        uint256 tokenPrice = PriceConverter.getPrice(details.priceFeed) * 10 ** (18 - pfDecimal);
-        uint256 costToSupport = (usdPrice * 10 ** 18) / tokenPrice;
+        uint256 usdPrice = liveAdsPrice * 10 ** 6;
+        uint256 tokenPrice = PriceConverter.getPrice(details.priceFeed) / 10 ** (pfDecimal - 6);
+        uint256 costToSupport = (usdPrice * 10 ** 6) / tokenPrice;
         if (_amount < costToSupport) {
             revert StreamfundValidationError("Insufficient amount");
         }
