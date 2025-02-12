@@ -24,6 +24,7 @@ const chainIds = {
   "polygon-mumbai": 80001,
   sepolia: 11155111,
   "base-sepolia": 84532,
+  "manta-sepolia": 3441006,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
@@ -34,6 +35,9 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       break;
     case "bsc":
       jsonRpcUrl = "https://bsc-dataseed1.binance.org";
+      break;
+    case "manta-sepolia":
+      jsonRpcUrl = "https://pacific-rpc.sepolia-testnet.manta.network/http";
       break;
     default:
       jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
@@ -55,34 +59,16 @@ const config: HardhatUserConfig = {
     deployer: 0,
   },
   etherscan: {
-    apiKey: {
-      arbitrumOne: vars.get("ARBISCAN_API_KEY", ""),
-      avalanche: vars.get("SNOWTRACE_API_KEY", ""),
-      bsc: vars.get("BSCSCAN_API_KEY", ""),
-      mainnet: vars.get("ETHERSCAN_API_KEY", ""),
-      optimisticEthereum: vars.get("OPTIMISM_API_KEY", ""),
-      polygon: vars.get("POLYGONSCAN_API_KEY", ""),
-      polygonMumbai: vars.get("POLYGONSCAN_API_KEY", ""),
-      sepolia: vars.get("ETHERSCAN_API_KEY", ""),
-      "base-sepolia": vars.get("BASESCAN_API_KEY", ""),
-    },
+    apiKey: "not_set",
     customChains: [
       {
-        network: "base",
-        chainId: 8453,
+        network: "manta-sepolia",
+        chainId: 3441006,
         urls: {
-          apiURL: "https://api.basescan.org/api",
-          browserURL: "https://basescan.org",
+          apiURL: "https://pacific-info.sepolia-testnet.manta.network/api",
+          browserURL: "https://pacific-explorer.sepolia-testnet.manta.network",
         },
-      },
-      {
-        network: "base-sepolia",
-        chainId: 84532,
-        urls: {
-          apiURL: "https://api-sepolia.basescan.org/api",
-          browserURL: "https://sepolia.basescan.org",
-        },
-      },
+      }
     ],
   },
 
@@ -116,6 +102,7 @@ const config: HardhatUserConfig = {
     "polygon-mumbai": getChainConfig("polygon-mumbai"),
     sepolia: getChainConfig("sepolia"),
     "base-sepolia": getChainConfig("base-sepolia"),
+    "manta-sepolia": getChainConfig("manta-sepolia"),
   },
   paths: {
     artifacts: "./artifacts",
@@ -146,3 +133,7 @@ const config: HardhatUserConfig = {
 };
 
 export default config;
+
+// bunx hardhat verify --network manta-sepolia --constructor-args args/token0.ts 0x2A69c74A20e0960fAa763a9859B10d6766DCDda1 && bunx hardhat verify --network base-sepolia --constructor-args args/token1.ts 0x82EE3B66B125C0DED18035eC05fC2D2D3acAcAdB
+
+// bunx hardhat verify 0x4B2C2fAD09eD8ACF54fF882d2236d023A4b92086

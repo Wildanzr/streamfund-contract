@@ -1,6 +1,6 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
-import { parseEther, parseUnits } from "ethers";
+import { parseEther } from "ethers";
 import { ethers } from "hardhat";
 
 import { deployStreamfundFixture } from "./fixture/Streamfund.fixture";
@@ -199,46 +199,6 @@ describe("Streamfund", function () {
 
       const postBalance = await this.deployedERC20[0].balanceOf(this.accounts[0]);
       expect(postBalance).to.be.equal(preBalance + BigInt(0.01 * 10 ** 18));
-    });
-  });
-
-  describe("Get allowed token price and decimal", function () {
-    this.beforeEach(async function () {
-      const { accounts, deployedERC20, deployedPriceFeed, streamfund, owner } =
-        await this.loadFixture(deployStreamfundFixture);
-
-      this.accounts = accounts;
-      this.streamfund = streamfund;
-      this.deployedERC20 = deployedERC20;
-      this.deployedPriceFeed = deployedPriceFeed;
-      this.owner = owner;
-
-      // Add some token and 1 for error testing
-      for (let i = 0; i < this.deployedERC20.length; i++) {
-        const [tokenAddr, pfAddr, decimal, symbol] = await Promise.all([
-          this.deployedERC20[i].getAddress(),
-          this.deployedPriceFeed[i].getAddress(),
-          this.deployedERC20[i].decimals(),
-          this.deployedERC20[i].symbol(),
-        ]);
-        await this.deployedERC20[i].connect(this.owner).mintTo(this.accounts[1].address, BigInt(0.1 * 10 ** 18));
-        await this.deployedERC20[i].connect(this.accounts[1]).mint();
-        if (i !== this.deployedERC20.length - 1) {
-          await this.streamfund.addAllowedToken(tokenAddr, pfAddr, decimal, symbol);
-        }
-      }
-    });
-
-    it("Should failed to get price because token is not allowed", async function () {
-      await expect(
-        this.streamfund.getAllowedTokenPrice(await this.deployedERC20[1].getAddress()),
-      ).to.be.revertedWithCustomError(this.streamfund, "StreamfundValidationError");
-    });
-
-    it("Should get price and decimal perfectly", async function () {
-      const [price, decimal] = await this.streamfund.getAllowedTokenPrice(await this.deployedERC20[0].getAddress());
-      expect(price).to.be.equal(parseUnits("2000", 8));
-      expect(decimal).to.be.equal(8);
     });
   });
 });

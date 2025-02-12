@@ -7,7 +7,6 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Streamers } from "./Streamers.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
-import { PriceConverter } from "./PriceConverter.sol";
 
 contract Streamfund is AccessControl, Tokens, Streamers {
     using SafeERC20 for IERC20;
@@ -23,7 +22,7 @@ contract Streamfund is AccessControl, Tokens, Streamers {
 
     function supportWithETH(address _streamer, string memory _message) external payable {
         if (msg.value == 0) {
-            revert StreamfundValidationError("Amount cannot be zero");
+            revert StreamfundValidationError("Amount cant be zero");
         }
         if (!_isStreamerExist(_streamer)) {
             revert StreamfundValidationError("Streamer not registered");
@@ -69,14 +68,5 @@ contract Streamfund is AccessControl, Tokens, Streamers {
         IERC20(_allowedToken).safeTransferFrom(msg.sender, _streamer, amount);
         _addTokenSupport(_streamer, _allowedToken, amount);
         emit SupportReceived(_streamer, msg.sender, _allowedToken, amount, _message);
-    }
-
-    function getAllowedTokenPrice(address _token) external view returns (uint256, uint8) {
-        if (!_isTokenAvailable(_token)) {
-            revert StreamfundValidationError("Token not allowed");
-        }
-        uint256 price = PriceConverter.getPrice(allowedTokens[_token].priceFeed);
-        uint8 decimal = PriceConverter.getDecimal(allowedTokens[_token].priceFeed);
-        return (price, decimal);
     }
 }

@@ -4,13 +4,11 @@ pragma solidity >=0.8.9;
 
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
-import { AggregatorV3Interface } from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract Tokens is AccessControl {
     using EnumerableMap for EnumerableMap.UintToAddressMap;
 
     struct AllowedToken {
-        AggregatorV3Interface priceFeed;
         uint256 index;
         uint8 decimal;
         string symbol;
@@ -52,12 +50,7 @@ contract Tokens is AccessControl {
         if (_decimal == 0) {
             revert TokenValidationError("decimal cannot be zero");
         }
-        allowedTokens[_tokenAddress] = AllowedToken({
-            priceFeed: AggregatorV3Interface(_priceFeed),
-            index: tokens.length(),
-            decimal: _decimal,
-            symbol: _symbol
-        });
+        allowedTokens[_tokenAddress] = AllowedToken({ index: tokens.length(), decimal: _decimal, symbol: _symbol });
         tokens.set(tokens.length(), _tokenAddress);
         emit TokenAdded(_tokenAddress, _priceFeed, _decimal, _symbol);
     }
@@ -105,6 +98,6 @@ contract Tokens is AccessControl {
      * @return bool True if the token is available, false otherwise
      */
     function _isTokenAvailable(address _tokenAddress) internal view returns (bool) {
-        return allowedTokens[_tokenAddress].priceFeed != AggregatorV3Interface(address(0));
+        return allowedTokens[_tokenAddress].decimal != 0;
     }
 }
