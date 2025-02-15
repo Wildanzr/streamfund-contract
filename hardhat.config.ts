@@ -25,6 +25,7 @@ const chainIds = {
   sepolia: 11155111,
   "base-sepolia": 84532,
   "manta-sepolia": 3441006,
+  "manta": 169,
 };
 
 function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
@@ -39,6 +40,9 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
     case "manta-sepolia":
       jsonRpcUrl = "https://pacific-rpc.sepolia-testnet.manta.network/http";
       break;
+    case "manta": 
+      jsonRpcUrl = "https://pacific-rpc.manta.network/http";
+      break
     default:
       jsonRpcUrl = "https://" + chain + ".infura.io/v3/" + infuraApiKey;
   }
@@ -67,6 +71,14 @@ const config: HardhatUserConfig = {
         urls: {
           apiURL: "https://pacific-info.sepolia-testnet.manta.network/api",
           browserURL: "https://pacific-explorer.sepolia-testnet.manta.network",
+        },
+      },
+      {
+        network: "manta",
+        chainId: 169,
+        urls: {
+          apiURL: "https://pacific-info.manta.network/api",
+          browserURL: "https://pacific-explorer.manta.network",
         },
       }
     ],
@@ -103,6 +115,7 @@ const config: HardhatUserConfig = {
     sepolia: getChainConfig("sepolia"),
     "base-sepolia": getChainConfig("base-sepolia"),
     "manta-sepolia": getChainConfig("manta-sepolia"),
+    "manta": getChainConfig("manta"),
   },
   paths: {
     artifacts: "./artifacts",

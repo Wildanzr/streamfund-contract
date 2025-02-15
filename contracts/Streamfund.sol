@@ -30,8 +30,8 @@ contract Streamfund is AccessControl, Tokens, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        if (block.chainid != 84532) {
-            revert StreamfundValidationError("Only base sepolia chain is supported");
+        if (block.chainid != 3441006) {
+            revert StreamfundValidationError("Only manta sepolia chain is supported");
         }
 
         payable(_streamer).transfer(msg.value);
@@ -57,8 +57,8 @@ contract Streamfund is AccessControl, Tokens, Streamers {
         if (bytes(_message).length > 150) {
             revert StreamfundValidationError("Message too long");
         }
-        if (block.chainid != 84532) {
-            revert StreamfundValidationError("Only base sepolia chain is supported");
+        if (block.chainid != 3441006) {
+            revert StreamfundValidationError("Only manta sepolia chain is supported");
         }
         uint256 allowance = IERC20(_allowedToken).allowance(msg.sender, address(this));
         if (allowance < amount) {
